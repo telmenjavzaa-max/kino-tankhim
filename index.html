@@ -6,6 +6,16 @@
 <title>Кино Танхим</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Монгол кино онлайнаар үзэх — утас эсвэл Google-ээр нэвтэрнэ">
+<meta name="theme-color" content="#150d11">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Кино Танхим">
+<meta property="og:description" content="Монгол кино онлайнаар үзэх — утас эсвэл Google-ээр нэвтэрнэ">
+<meta property="og:url" content="https://telmenjavzaa-max.github.io/kino-tankhim/">
+<meta property="og:image" content="https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/talyn-salkhi-v2.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23150d11'/%3E%3Ccircle cx='9' cy='16' r='3' fill='%23dcaa4a'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23dcaa4a'/%3E%3Ccircle cx='23' cy='16' r='3' fill='%23dcaa4a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://jaqapcgokfkrioydxgmk.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://jaqapcgokfkrioydxgmk.supabase.co">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
@@ -82,7 +92,7 @@ select { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); 
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
 .poster { position: relative; aspect-ratio: 2 / 3; width: 100%; max-width: 100%; border-radius: var(--radius); overflow: hidden; background: linear-gradient(160deg, hsl(var(--h1) 55% 42%), hsl(var(--h2) 60% 14%)); display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; transition: transform .2s ease, box-shadow .2s ease; isolation: isolate; }
-.poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; z-index: 1; }
 .poster .p-title { font-family: var(--display); font-weight: 900; font-size: clamp(16px, 1.6vw, 20px); line-height: 1.05; text-transform: uppercase; color: #fff; text-wrap: balance; overflow-wrap: anywhere; text-shadow: 0 2px 12px #0007; }
 .poster .p-year { font-family: var(--mono); font-size: 11px; color: #ffffffcc; margin-top: 6px; letter-spacing: .08em; }
 .poster .fav-mark { position: absolute; top: 10px; right: 10px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: #000a; display: grid; place-items: center; }
@@ -214,12 +224,12 @@ footer .wrap { padding-block: 22px; }
 (() => {
   // ---------- Туршилтын кинонууд (Supabase холбогдоогүй үед) ----------
   const SAMPLE = [
-    { id: 1, title: "Талын салхи", year: 2025, genre: "Драм", runtime: 112, hue1: 35, hue2: 15, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/talyn-salkhi.jpg", video_url: "", description: "Хотоос буцаж ирсэн залуу эцгийнхээ адуун сүргийг авч үлдэхийн тулд өвлийн зудтай тэмцэнэ." },
+    { id: 1, title: "Талын салхи", year: 2025, genre: "Драм", runtime: 112, hue1: 35, hue2: 15, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/talyn-salkhi-v2.jpg", video_url: "", description: "Хотоос буцаж ирсэн залуу эцгийнхээ адуун сүргийг авч үлдэхийн тулд өвлийн зудтай тэмцэнэ." },
     { id: 2, title: "Шөнийн Улаанбаатар", year: 2025, genre: "Триллер", runtime: 104, hue1: 350, hue2: 190, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/shoniin-ub.jpg", video_url: "", description: "Утаат өвлийн шөнө такси жолооч санамсаргүйгээр гэмт хэргийн гэрч болж, үүр цайхаас өмнө үнэнийг олох ёстой болно." },
-    { id: 3, title: "Мөнх тэнгэрийн дор", year: 2024, genre: "Түүхэн", runtime: 138, hue1: 215, hue2: 40, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/monkh-tengeriin-dor.jpg", video_url: "", description: "XIII зууны тал нутагт залуу харуул овгуудыг нэгтгэх их аянд өөрийн байр сууриа олно." },
-    { id: 4, title: "Сүүлчийн нүүдэл", year: 2025, genre: "Адал явдалт", runtime: 97, hue1: 25, hue2: 45, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/suulchiin-nuudel.jpg", video_url: "", description: "Малчин гэр бүл ган гачигтай зун Говийг гатлан шинэ нутаг хайж, сүүлчийн удаа нүүнэ." },
-    { id: 5, title: "Хөх толбо", year: 2025, genre: "Инээдмийн", runtime: 92, hue1: 210, hue2: 50, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/khokh-tolbo.jpg", video_url: "", description: "Гэнэт эгчийнхээ хүүхдийг долоо хоног харахаар болсон ганц бие залуугийн инээдтэй адал явдал." },
-    { id: 6, title: "Чимээгүй хөндий", year: 2025, genre: "Аймшгийн", runtime: 99, hue1: 150, hue2: 200, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/chimeegui-khondii.jpg", video_url: "", description: "Уулын хөндийд зуны амралтаараа очсон найзууд хаягдсан гэрээс шөнө бүр гэрэл асахыг анзаарна." }
+    { id: 3, title: "Мөнх тэнгэрийн дор", year: 2024, genre: "Түүхэн", runtime: 138, hue1: 215, hue2: 40, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/monkh-tengeriin-dor-v2.jpg", video_url: "", description: "XIII зууны тал нутагт залуу харуул овгуудыг нэгтгэх их аянд өөрийн байр сууриа олно." },
+    { id: 4, title: "Сүүлчийн нүүдэл", year: 2025, genre: "Адал явдалт", runtime: 97, hue1: 25, hue2: 45, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/suulchiin-nuudel-v2.jpg", video_url: "", description: "Малчин гэр бүл ган гачигтай зун Говийг гатлан шинэ нутаг хайж, сүүлчийн удаа нүүнэ." },
+    { id: 5, title: "Хөх толбо", year: 2025, genre: "Инээдмийн", runtime: 92, hue1: 210, hue2: 50, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/khokh-tolbo-v2.jpg", video_url: "", description: "Гэнэт эгчийнхээ хүүхдийг долоо хоног харахаар болсон ганц бие залуугийн инээдтэй адал явдал." },
+    { id: 6, title: "Чимээгүй хөндий", year: 2025, genre: "Аймшгийн", runtime: 99, hue1: 150, hue2: 200, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/chimeegui-khondii-v2.jpg", video_url: "", description: "Уулын хөндийд зуны амралтаараа очсон найзууд хаягдсан гэрээс шөнө бүр гэрэл асахыг анзаарна." }
   ];
 
   // ---------- Тохиргоо ----------
@@ -260,9 +270,9 @@ footer .wrap { padding-block: 22px; }
   }
 
   const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.3 5 6.6 5c2 0 3.5 1.1 5.4 3 1.9-1.9 3.4-3 5.4-3C20.7 5 23 8.3 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>';
-  function posterHTML(m, withBadges = true) {
+  function posterHTML(m, withBadges = true, priority = false) {
     return `<div class="poster" style="--h1:${+m.hue1 || 0};--h2:${+m.hue2 || 220}">
-      ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+      ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="${esc(m.title)} постер" width="600" height="848" ${priority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}
       ${withBadges && !m.video_url ? `<span class="soon">Удахгүй</span>` : ""}
       ${withBadges && state.favs.has(m.id) ? `<span class="fav-mark" title="Миний жагсаалтад">${heart}</span>` : ""}
       <div class="p-title">${esc(m.title)}</div>
@@ -304,19 +314,20 @@ footer .wrap { padding-block: 22px; }
 
   // ---------- Харуулах ----------
   function visible() {
-    const q = state.q.trim().toLowerCase();
+    const norm = (v) => String(v || "").toLowerCase().replace(/ө/g, "о").replace(/ү/g, "у").replace(/ё/g, "е");
+    const q = norm(state.q.trim());
     const by = { new: (a, b) => b.year - a.year || b.id - a.id, title: (a, b) => a.title.localeCompare(b.title, "mn"), runtime: (a, b) => a.runtime - b.runtime }[state.sort] || ((a, b) => b.year - a.year);
     return state.movies.filter((m) =>
       (state.genre === "Бүгд" || m.genre === state.genre) &&
       (!state.favOnly || state.favs.has(m.id)) &&
-      (!q || [m.title, m.genre, m.description].some((v) => String(v || "").toLowerCase().includes(q)))
+      (!q || [m.title, m.genre, m.description].some((v) => norm(v).includes(q)))
     ).sort(by);
   }
   function renderFeatured() {
     const top = state.movies.find((m) => m.featured) || [...state.movies].sort((a, b) => b.year - a.year || a.id - b.id)[0];
     if (!top) return;
     $("#featured").innerHTML = `
-      ${posterHTML(top, false)}
+      ${posterHTML(top, false, true)}
       <div>
         <div class="eyebrow">Онцлох кино · ${esc(top.genre)} · ${esc(top.year)}</div>
         <h1>${esc(top.title)}</h1>
@@ -436,6 +447,7 @@ footer .wrap { padding-block: 22px; }
   });
   $("#loginBtn").addEventListener("click", () => openAuth());
   $("#logoutBtn").addEventListener("click", async () => { await sb?.auth.signOut(); toast("Гарлаа"); });
+  document.addEventListener("keydown", (e) => { if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName) && !document.querySelector("dialog[open]")) { e.preventDefault(); $("#q").focus(); } });
   $("#q").addEventListener("input", (e) => { state.q = e.target.value; render(); });
   $("#sort").value = state.sort;
   $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; store.set("kino.sort", state.sort); render(); });
