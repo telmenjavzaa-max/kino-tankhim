@@ -1,0 +1,447 @@
+<title>Кино Танхим</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Монгол кино онлайнаар үзэх — утас эсвэл Google-ээр нэвтэрнэ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: кино театрын танхим — дээр нь гэрэлт самбар (онцлох кино), доор нь суудлын эгнээ шиг постер сүлжээ */
+:root {
+  --bg: #150d11;
+  --surface: #21141a;
+  --surface-2: #2b1a22;
+  --line: #3d2731;
+  --fg: #f4ebe5;
+  --muted: #b7a1a8;
+  --brass: #dcaa4a;
+  --brass-ink: #1d1206;
+  --ok: #6fbf8e;
+  --err: #ff8c95;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; min-height: 100vh; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+a { color: var(--brass); }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; gap: 14px; padding-block: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--display); font-weight: 900; font-size: 20px; letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+.brand .bulbs { display: inline-flex; gap: 3px; }
+.brand .bulbs i { width: 6px; height: 6px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 6px var(--brass); }
+.spacer { flex: 1; }
+.pill { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill.live { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.who { font-size: 13px; color: var(--muted); max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 9px 15px; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; }
+.btn.wide { width: 100%; }
+.btn[disabled] { opacity: .55; cursor: default; }
+
+.marquee { margin-block: 28px 8px; display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 28px; align-items: center; padding: 22px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(120deg, var(--surface), var(--bg)); position: relative; overflow: hidden; }
+.marquee::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(circle, var(--brass) 1.6px, transparent 2.2px); background-size: 22px 22px; background-position: 11px 11px; opacity: .14; mask: linear-gradient(90deg, transparent 40%, #000); }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+.marquee h1 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4.4vw, 46px); line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
+.marquee p { color: var(--muted); max-width: 60ch; margin: 0 0 16px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-block: 24px 14px; }
+.search { flex: 1 1 260px; position: relative; }
+.search input { width: 100%; padding: 11px 14px 11px 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+.search svg { position: absolute; left: 12px; top: 50%; translate: 0 -50%; width: 16px; height: 16px; stroke: var(--muted); }
+select { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.chip { border: 1px solid var(--line); background: transparent; padding: 6px 12px; border-radius: 99px; font-size: 13px; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.count { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 18px; margin-bottom: 60px; }
+.card { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card:hover .poster { transform: translateY(-4px); box-shadow: 0 14px 30px -12px #000; }
+.card .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+.card .name { font-weight: 700; font-size: 15px; line-height: 1.3; color: var(--fg); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.poster { position: relative; aspect-ratio: 2 / 3; width: 100%; max-width: 100%; border-radius: var(--radius); overflow: hidden; background: linear-gradient(160deg, hsl(var(--h1) 55% 42%), hsl(var(--h2) 60% 14%)); display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; transition: transform .2s ease, box-shadow .2s ease; isolation: isolate; }
+.poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.poster .p-title { font-family: var(--display); font-weight: 900; font-size: clamp(16px, 1.6vw, 20px); line-height: 1.05; text-transform: uppercase; color: #fff; text-wrap: balance; overflow-wrap: anywhere; text-shadow: 0 2px 12px #0007; }
+.poster .p-year { font-family: var(--mono); font-size: 11px; color: #ffffffcc; margin-top: 6px; letter-spacing: .08em; }
+.poster .fav-mark { position: absolute; top: 10px; right: 10px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: #000a; display: grid; place-items: center; }
+.poster .fav-mark svg { width: 15px; height: 15px; fill: var(--brass); }
+.poster .soon { position: absolute; left: 10px; top: 10px; z-index: 2; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: #000b; color: #fff; padding: 3px 7px; border-radius: 4px; }
+.empty { padding: 40px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; grid-column: 1 / -1; }
+
+dialog { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 14px; padding: 0; width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 40px); }
+dialog::backdrop { background: #000c; }
+#authDlg { width: min(420px, calc(100vw - 32px)); }
+.d-body { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 24px; padding: 24px; }
+.d-body h2 { font-family: var(--display); font-size: 26px; line-height: 1.1; margin: 0 0 8px; text-wrap: balance; padding-right: 30px; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; margin: 14px 0; }
+.facts dt { color: var(--muted); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding-top: 2px; }
+.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.close-x { position: absolute; top: 10px; right: 10px; z-index: 3; border: 0; background: var(--surface-2); width: 34px; height: 34px; border-radius: 50%; font-size: 18px; }
+.player { aspect-ratio: 16 / 9; width: 100%; max-width: 100%; background: #000; border-bottom: 1px solid var(--line); }
+.player iframe { width: 100%; height: 100%; border: 0; display: block; }
+.note { font-size: 13px; color: var(--muted); }
+
+.auth { padding: 26px; display: grid; gap: 14px; }
+.auth h2 { font-family: var(--display); margin: 0; font-size: 22px; }
+.auth label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.auth input { width: 100%; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+.phone-row { display: flex; gap: 8px; }
+.phone-row .cc { flex: 0 0 auto; padding: 11px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); font-family: var(--mono); }
+.phone-row input { flex: 1; min-width: 0; font-family: var(--mono); letter-spacing: .04em; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.g-logo { width: 18px; height: 18px; }
+.msg { font-size: 13px; min-height: 1.2em; }
+.msg.err { color: var(--err); }
+.msg.ok { color: var(--ok); }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 50; }
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+footer .wrap { padding-block: 22px; }
+
+@media (max-width: 640px) {
+  .marquee { grid-template-columns: minmax(0, 120px) minmax(0, 1fr); gap: 16px; padding: 16px; }
+  .marquee p { display: none; }
+  .d-body { grid-template-columns: 1fr; }
+  .d-body .poster { max-width: 180px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 18px 12px; }
+  .who { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="bulbs"><i></i><i></i><i></i></span>Кино Танхим</div>
+    <span class="spacer"></span>
+    <span class="pill" id="mode">Демо горим</span>
+    <span class="who" id="who" hidden></span>
+    <button class="btn primary" id="loginBtn">Нэвтрэх</button>
+    <button class="btn ghost" id="logoutBtn" hidden>Гарах</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="marquee" id="featured" aria-label="Онцлох кино"></section>
+
+  <div class="controls">
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Кино хайх…" aria-label="Хайх">
+    </label>
+    <select id="sort" aria-label="Эрэмбэлэх">
+      <option value="new">Шинэ нь эхэнд</option>
+      <option value="title">Нэрээр (А–Я)</option>
+      <option value="runtime">Богино нь эхэнд</option>
+    </select>
+    <button class="chip" id="favOnly" aria-pressed="false">★ Миний жагсаалт</button>
+  </div>
+  <div class="chips" id="genres" role="group" aria-label="Төрөл"></div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer><div class="wrap">Кино Танхим · Өгөгдөл: <span id="src">туршилтын жишээ</span></div></footer>
+
+<dialog id="movieDlg" aria-labelledby="dTitle">
+  <button class="close-x" data-close aria-label="Хаах">×</button>
+  <div id="movieBody"></div>
+</dialog>
+
+<dialog id="authDlg" aria-labelledby="aTitle">
+  <div class="auth">
+    <h2 id="aTitle">Нэвтрэх</h2>
+    <p class="note" id="authHint">Кино үзэхийн тулд утасны дугаар эсвэл Google-ээр нэвтэрнэ үү.</p>
+
+    <button class="btn wide" type="button" id="googleBtn">
+      <svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+      Google-ээр нэвтрэх
+    </button>
+
+    <div class="or">эсвэл утсаар</div>
+
+    <form id="phoneForm" novalidate>
+      <label for="phone">Утасны дугаар
+        <span class="phone-row"><span class="cc">+976</span><input id="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="9911 2233" maxlength="9"></span>
+      </label>
+      <div style="height:10px"></div>
+      <button class="btn primary wide" type="submit" id="sendCodeBtn">Код илгээх</button>
+    </form>
+
+    <form id="codeForm" novalidate hidden>
+      <label for="code">SMS-ээр ирсэн 6 оронтой код
+        <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+      </label>
+      <div style="height:10px"></div>
+      <div class="actions">
+        <button class="btn primary" type="submit">Баталгаажуулах</button>
+        <button class="btn ghost" type="button" id="changePhone">Дугаар солих</button>
+      </div>
+    </form>
+
+    <div class="msg" id="authMsg" role="status"></div>
+    <button class="btn ghost" type="button" data-close>Болих</button>
+  </div>
+</dialog>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(() => {
+  // ---------- Туршилтын кинонууд (Supabase холбогдоогүй үед) ----------
+  const SAMPLE = [
+    { id: 1, title: "Талын салхи", year: 2025, genre: "Драм", runtime: 112, hue1: 35, hue2: 15, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/talyn-salkhi.jpg", video_url: "", description: "Хотоос буцаж ирсэн залуу эцгийнхээ адуун сүргийг авч үлдэхийн тулд өвлийн зудтай тэмцэнэ." },
+    { id: 2, title: "Шөнийн Улаанбаатар", year: 2025, genre: "Триллер", runtime: 104, hue1: 350, hue2: 190, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/shoniin-ub.jpg", video_url: "", description: "Утаат өвлийн шөнө такси жолооч санамсаргүйгээр гэмт хэргийн гэрч болж, үүр цайхаас өмнө үнэнийг олох ёстой болно." },
+    { id: 3, title: "Мөнх тэнгэрийн дор", year: 2024, genre: "Түүхэн", runtime: 138, hue1: 215, hue2: 40, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/monkh-tengeriin-dor.jpg", video_url: "", description: "XIII зууны тал нутагт залуу харуул овгуудыг нэгтгэх их аянд өөрийн байр сууриа олно." },
+    { id: 4, title: "Сүүлчийн нүүдэл", year: 2025, genre: "Адал явдалт", runtime: 97, hue1: 25, hue2: 45, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/suulchiin-nuudel.jpg", video_url: "", description: "Малчин гэр бүл ган гачигтай зун Говийг гатлан шинэ нутаг хайж, сүүлчийн удаа нүүнэ." },
+    { id: 5, title: "Хөх толбо", year: 2025, genre: "Инээдмийн", runtime: 92, hue1: 210, hue2: 50, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/khokh-tolbo.jpg", video_url: "", description: "Гэнэт эгчийнхээ хүүхдийг долоо хоног харахаар болсон ганц бие залуугийн инээдтэй адал явдал." },
+    { id: 6, title: "Чимээгүй хөндий", year: 2025, genre: "Аймшгийн", runtime: 99, hue1: 150, hue2: 200, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/chimeegui-khondii.jpg", video_url: "", description: "Уулын хөндийд зуны амралтаараа очсон найзууд хаягдсан гэрээс шөнө бүр гэрэл асахыг анзаарна." }
+  ];
+
+  // ---------- Тохиргоо ----------
+  const cfg = window.KINO_CONFIG || {};
+  let sb = null;
+  try {
+    if (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase) sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  } catch (e) { console.warn("Supabase эхлүүлж чадсангүй:", e); }
+
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  const state = { movies: [], q: "", genre: "Бүгд", sort: store.get("kino.sort", "new"), favOnly: false, user: null, favs: new Set(store.get("kino.favs", [])), current: null, phone: "", pendingPlay: null };
+
+  function toast(text) {
+    const t = document.createElement("div");
+    t.className = "toast"; t.textContent = text; t.setAttribute("role", "status");
+    document.body.appendChild(t); setTimeout(() => t.remove(), 2400);
+  }
+
+  // Bunny Stream / Kinescope / Vimeo холбоосыг тоглуулагчийн embed хаяг болгоно
+  function embedUrl(raw) {
+    if (!raw) return "";
+    let u; try { u = new URL(raw); } catch { return ""; }
+    const h = u.hostname.replace(/^www\./, "");
+    const parts = u.pathname.split("/").filter(Boolean);
+    if (h === "vimeo.com" && /^\d+$/.test(parts[0] || "")) return `https://player.vimeo.com/video/${parts[0]}${parts[1] ? "?h=" + parts[1] : ""}`;
+    if (h === "player.vimeo.com") return u.href;
+    if (h === "kinescope.io") return parts[0] === "embed" ? u.href : `https://kinescope.io/embed/${parts[parts.length - 1]}`;
+    if (h === "iframe.mediadelivery.net" || h === "player.mediadelivery.net") {
+      if (parts[0] === "play") return `https://iframe.mediadelivery.net/embed/${parts[1]}/${parts[2]}`;
+      return u.href;
+    }
+    return u.protocol === "https:" ? u.href : "";
+  }
+
+  const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.3 5 6.6 5c2 0 3.5 1.1 5.4 3 1.9-1.9 3.4-3 5.4-3C20.7 5 23 8.3 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>';
+  function posterHTML(m, withBadges = true) {
+    return `<div class="poster" style="--h1:${+m.hue1 || 0};--h2:${+m.hue2 || 220}">
+      ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+      ${withBadges && !m.video_url ? `<span class="soon">Удахгүй</span>` : ""}
+      ${withBadges && state.favs.has(m.id) ? `<span class="fav-mark" title="Миний жагсаалтад">${heart}</span>` : ""}
+      <div class="p-title">${esc(m.title)}</div>
+      <div class="p-year">${esc(m.year)} · ${esc(m.runtime)} мин</div>
+    </div>`;
+  }
+
+  // ---------- Өгөгдөл ----------
+  async function loadMovies() {
+    if (sb) {
+      const { data, error } = await sb.from("movies").select("*").eq("published", true);
+      if (!error && data?.length) { $("#src").textContent = "Supabase"; return data; }
+      if (error) console.warn("movies хүснэгт:", error.message);
+    }
+    return SAMPLE;
+  }
+  async function loadFavs() {
+    if (sb && state.user) {
+      const { data, error } = await sb.from("favorites").select("movie_id");
+      if (!error) state.favs = new Set(data.map((r) => r.movie_id));
+    } else if (!sb) state.favs = new Set(store.get("kino.favs", []));
+    else state.favs = new Set();
+  }
+  async function toggleFav(id) {
+    if (sb && !state.user) { openAuth("Жагсаалтдаа нэмэхийн тулд нэвтэрнэ үү."); return; }
+    const has = state.favs.has(id);
+    if (sb) {
+      const { error } = has
+        ? await sb.from("favorites").delete().eq("movie_id", id).eq("user_id", state.user.id)
+        : await sb.from("favorites").insert({ movie_id: id, user_id: state.user.id });
+      if (error) { toast("Хадгалж чадсангүй: " + error.message); return; }
+    }
+    has ? state.favs.delete(id) : state.favs.add(id);
+    if (!sb) store.set("kino.favs", [...state.favs]);
+    toast(has ? "Жагсаалтаас хасагдлаа" : "Миний жагсаалтад нэмэгдлээ");
+    render();
+    if (state.current?.id === id) openMovie(id);
+  }
+
+  // ---------- Харуулах ----------
+  function visible() {
+    const q = state.q.trim().toLowerCase();
+    const by = { new: (a, b) => b.year - a.year || b.id - a.id, title: (a, b) => a.title.localeCompare(b.title, "mn"), runtime: (a, b) => a.runtime - b.runtime }[state.sort] || ((a, b) => b.year - a.year);
+    return state.movies.filter((m) =>
+      (state.genre === "Бүгд" || m.genre === state.genre) &&
+      (!state.favOnly || state.favs.has(m.id)) &&
+      (!q || [m.title, m.genre, m.description].some((v) => String(v || "").toLowerCase().includes(q)))
+    ).sort(by);
+  }
+  function renderFeatured() {
+    const top = state.movies.find((m) => m.featured) || [...state.movies].sort((a, b) => b.year - a.year || a.id - b.id)[0];
+    if (!top) return;
+    $("#featured").innerHTML = `
+      ${posterHTML(top, false)}
+      <div>
+        <div class="eyebrow">Онцлох кино · ${esc(top.genre)} · ${esc(top.year)}</div>
+        <h1>${esc(top.title)}</h1>
+        <p>${esc(top.description)}</p>
+        <div class="actions">
+          <button class="btn primary" data-play="${top.id}">▶ Үзэх</button>
+          <button class="btn" data-open="${top.id}">Дэлгэрэнгүй</button>
+        </div>
+      </div>`;
+  }
+  function renderGenres() {
+    const genres = ["Бүгд", ...new Set(state.movies.map((m) => m.genre).filter(Boolean))];
+    $("#genres").innerHTML = genres.map((g) => `<button class="chip" data-genre="${esc(g)}" aria-pressed="${g === state.genre}">${esc(g)}</button>`).join("");
+  }
+  function render() {
+    renderFeatured(); renderGenres();
+    const list = visible();
+    $("#count").textContent = `${list.length} / ${state.movies.length} кино`;
+    $("#grid").innerHTML = list.length
+      ? list.map((m) => `
+        <button class="card" data-open="${m.id}" aria-label="${esc(m.title)}, ${esc(m.year)}">
+          ${posterHTML(m)}
+          <div class="name">${esc(m.title)}</div>
+          <div class="meta"><span>${esc(m.genre)}</span><span class="mono">${esc(m.runtime)} мин</span></div>
+        </button>`).join("")
+      : `<div class="empty">${state.favOnly ? "Жагсаалт хоосон байна. Кино нээгээд ☆ товчийг дарна уу." : "Хайлтад тохирох кино олдсонгүй."}</div>`;
+  }
+
+  function openMovie(id, play = false) {
+    const m = state.movies.find((x) => x.id === id);
+    if (!m) return;
+    state.current = m;
+    const src = embedUrl(m.video_url);
+    const playerHTML = play && src
+      ? `<div class="player"><iframe src="${esc(src)}" title="${esc(m.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe></div>`
+      : "";
+    $("#movieBody").innerHTML = `${playerHTML}
+      <div class="d-body">
+        ${posterHTML(m, false)}
+        <div style="min-width:0">
+          <h2 id="dTitle">${esc(m.title)}</h2>
+          <dl class="facts">
+            <dt>Он</dt><dd>${esc(m.year)}</dd>
+            <dt>Төрөл</dt><dd>${esc(m.genre)}</dd>
+            <dt>Үргэлжлэх</dt><dd>${esc(m.runtime)} мин (${Math.floor(m.runtime / 60)} ц ${m.runtime % 60} мин)</dd>
+          </dl>
+          <p>${esc(m.description)}</p>
+          <div class="actions">
+            ${playerHTML ? "" : `<button class="btn primary" data-play="${m.id}" ${src ? "" : "disabled"}>${src ? "▶ Үзэх" : "Видео удахгүй нэмэгдэнэ"}</button>`}
+            <button class="btn" data-fav="${m.id}">${state.favs.has(m.id) ? "★ Жагсаалтаас хасах" : "☆ Миний жагсаалтад"}</button>
+          </div>
+        </div>
+      </div>`;
+    const dlg = $("#movieDlg");
+    if (!dlg.open) dlg.showModal();
+  }
+  function play(id) {
+    if (sb && !state.user) { state.pendingPlay = id; openAuth("Кино үзэхийн тулд нэвтэрнэ үү."); return; }
+    openMovie(id, true);
+  }
+
+  // ---------- Нэвтрэлт: Google + утас (SMS код) ----------
+  function authMsg(text, kind = "") { const m = $("#authMsg"); m.textContent = text; m.className = "msg " + kind; }
+  function openAuth(hint) {
+    authMsg("");
+    $("#phoneForm").hidden = false; $("#codeForm").hidden = true;
+    $("#authHint").textContent = sb ? (hint || "Кино үзэхийн тулд утасны дугаар эсвэл Google-ээр нэвтэрнэ үү.")
+      : "Нэвтрэлт Supabase холбогдсоны дараа ажиллана. Одоогоор туршилтын горимд байна.";
+    if ($("#movieDlg").open) $("#movieDlg").close();
+    $("#authDlg").showModal();
+  }
+  $("#googleBtn").addEventListener("click", async () => {
+    if (!sb) { authMsg("Supabase тохируулаагүй байна.", "err"); return; }
+    authMsg("Google руу шилжиж байна…");
+    const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
+    if (error) authMsg(error.message, "err");
+  });
+  $("#phoneForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!sb) { authMsg("Supabase тохируулаагүй байна.", "err"); return; }
+    const digits = $("#phone").value.replace(/\D/g, "");
+    if (!/^[6-9]\d{7}$/.test(digits)) { authMsg("8 оронтой утасны дугаараа оруулна уу (жишээ: 99112233).", "err"); return; }
+    state.phone = "+976" + digits;
+    $("#sendCodeBtn").disabled = true; authMsg("Код илгээж байна…");
+    const { error } = await sb.auth.signInWithOtp({ phone: state.phone });
+    $("#sendCodeBtn").disabled = false;
+    if (error) { authMsg("Код илгээж чадсангүй: " + error.message, "err"); return; }
+    $("#phoneForm").hidden = true; $("#codeForm").hidden = false; $("#code").focus();
+    authMsg(`${state.phone} дугаарт код илгээлээ.`, "ok");
+  });
+  $("#codeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const token = $("#code").value.replace(/\D/g, "");
+    if (token.length !== 6) { authMsg("6 оронтой кодоо оруулна уу.", "err"); return; }
+    authMsg("Шалгаж байна…");
+    const { error } = await sb.auth.verifyOtp({ phone: state.phone, token, type: "sms" });
+    if (error) { authMsg("Код буруу эсвэл хугацаа нь дууссан байна.", "err"); return; }
+    $("#authDlg").close(); toast("Нэвтэрлээ");
+  });
+  $("#changePhone").addEventListener("click", () => { $("#phoneForm").hidden = false; $("#codeForm").hidden = true; authMsg(""); });
+
+  async function onUser(user) {
+    state.user = user;
+    $("#loginBtn").hidden = !!user; $("#logoutBtn").hidden = !user; $("#who").hidden = !user;
+    $("#who").textContent = user ? (user.email || user.phone ? (user.email || "+" + user.phone) : "") : "";
+    await loadFavs(); render();
+    if (user && state.pendingPlay) { const id = state.pendingPlay; state.pendingPlay = null; openMovie(id, true); }
+  }
+
+  // ---------- Үйлдлүүд ----------
+  document.addEventListener("click", (e) => {
+    const p = e.target.closest("[data-play]"); if (p) { if (!p.disabled) play(+p.dataset.play); return; }
+    const o = e.target.closest("[data-open]"); if (o) { openMovie(+o.dataset.open); return; }
+    const f = e.target.closest("[data-fav]"); if (f) { toggleFav(+f.dataset.fav); return; }
+    const g = e.target.closest("[data-genre]"); if (g) { state.genre = g.dataset.genre; render(); return; }
+    const c = e.target.closest("[data-close]"); if (c) c.closest("dialog").close();
+  });
+  $("#loginBtn").addEventListener("click", () => openAuth());
+  $("#logoutBtn").addEventListener("click", async () => { await sb?.auth.signOut(); toast("Гарлаа"); });
+  $("#q").addEventListener("input", (e) => { state.q = e.target.value; render(); });
+  $("#sort").value = state.sort;
+  $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; store.set("kino.sort", state.sort); render(); });
+  $("#favOnly").addEventListener("click", (e) => { state.favOnly = !state.favOnly; e.currentTarget.setAttribute("aria-pressed", state.favOnly); render(); });
+  // Видео хаахад тоглуулагчийг зогсооно
+  $("#movieDlg").addEventListener("close", () => { state.current = null; $("#movieBody").innerHTML = ""; });
+
+  // ---------- Эхлүүлэх ----------
+  (async () => {
+    state.movies = SAMPLE; render();
+    if (!sb) return;
+    $("#mode").textContent = "Шууд"; $("#mode").classList.add("live");
+    state.movies = await loadMovies();
+    const { data } = await sb.auth.getSession();
+    await onUser(data.session?.user || null);
+    sb.auth.onAuthStateChange((_e, session) => { if ((session?.user?.id || null) !== (state.user?.id || null)) onUser(session?.user || null); });
+  })();
+})();
+</script>
