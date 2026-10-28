@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Кино Танхим</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Монгол кино онлайнаар үзэх — утас эсвэл Google-ээр нэвтэрнэ">
@@ -24,6 +29,9 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+img { max-width: 100%; }
 body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; min-height: 100vh; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
 .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -123,6 +131,8 @@ footer .wrap { padding-block: 22px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
+</head>
+<body>
 
 <header class="top">
   <div class="wrap">
@@ -445,3 +455,5 @@ footer .wrap { padding-block: 22px; }
   })();
 })();
 </script>
+</body>
+</html>
