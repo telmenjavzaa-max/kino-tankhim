@@ -114,6 +114,18 @@ dialog::backdrop { background: #000c; }
     <h1 id="gateTitle">Ачаалж байна…</h1>
     <p class="hint" id="gateText"></p>
     <button class="btn primary" id="gateLogin" hidden>Google-ээр нэвтрэх</button>
+    <div id="gatePhone" hidden style="display:grid;gap:10px;text-align:left">
+      <div class="hint" style="text-align:center">эсвэл утсаар</div>
+      <form id="aPhoneForm" style="display:flex;gap:8px">
+        <input id="aPhone" type="tel" inputmode="numeric" maxlength="8" placeholder="99112233" aria-label="Утасны дугаар" style="flex:1;min-width:0;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)">
+        <button class="btn" type="submit">Код авах</button>
+      </form>
+      <form id="aCodeForm" hidden style="display:flex;gap:8px">
+        <input id="aCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 оронтой код" autocomplete="one-time-code" aria-label="SMS код" style="flex:1;min-width:0;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)">
+        <button class="btn primary" type="submit">Нэвтрэх</button>
+      </form>
+      <div class="msg" id="aMsg" role="status"></div>
+    </div>
   </section>
 
   <div id="app" hidden>
@@ -211,7 +223,23 @@ dialog::backdrop { background: #000c; }
   const state = { movies: [], videos: {}, plans: [], editing: null, posterFile: null };
 
   function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; d.setAttribute("role", "status"); document.body.appendChild(d); setTimeout(() => d.remove(), 2400); }
-  function gate(title, text, showLogin) { $("#gate").hidden = false; $("#app").hidden = true; $("#gateTitle").textContent = title; $("#gateText").textContent = text || ""; $("#gateLogin").hidden = !showLogin; }
+  function gate(title, text, showLogin) { $("#gate").hidden = false; $("#app").hidden = true; $("#gateTitle").textContent = title; $("#gateText").textContent = text || ""; $("#gateLogin").hidden = !showLogin; $("#gatePhone").hidden = !showLogin; }
+  let aPhone = "";
+  const aMsg = (t, k = "") => { $("#aMsg").textContent = t; $("#aMsg").className = "msg " + k; };
+  $("#aPhoneForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const d = $("#aPhone").value.replace(/\D/g, "");
+    if (!/^[6-9]\d{7}$/.test(d)) { aMsg("8 оронтой дугаар оруулна уу.", "err"); return; }
+    aPhone = "+976" + d; aMsg("Код илгээж байна…");
+    const { error } = await sb.auth.signInWithOtp({ phone: aPhone, options: { shouldCreateUser: false } });
+    if (error) { aMsg("Код илгээж чадсангүй: " + error.message, "err"); return; }
+    $("#aPhoneForm").hidden = true; $("#aCodeForm").hidden = false; $("#aCode").focus(); aMsg("Код илгээлээ.", "ok");
+  });
+  $("#aCodeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const { error } = await sb.auth.verifyOtp({ phone: aPhone, token: $("#aCode").value.replace(/\D/g, ""), type: "sms" });
+    if (error) aMsg("Код буруу эсвэл хугацаа дууссан.", "err");
+  });
 
   // ---------- Нэвтрэлт ба эрх ----------
   $("#gateLogin").addEventListener("click", () => sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } }));
@@ -221,7 +249,7 @@ dialog::backdrop { background: #000c; }
     const { data } = await sb.auth.getSession();
     const user = data.session?.user;
     if (!user) return gate("Админ нэвтрэх", "Админ эрхтэй Google аккаунтаараа нэвтэрнэ үү.", true);
-    $("#who").textContent = user.email || user.phone || "";
+    $("#who").textContent = user.email || (user.phone ? "+" + user.phone : "");
     $("#logout").hidden = false;
     const { data: isAdmin, error } = await sb.rpc("is_admin");
     if (error || !isAdmin) return gate("Эрх хүрэлцэхгүй", "Энэ аккаунтад админ эрх байхгүй байна.", false);
