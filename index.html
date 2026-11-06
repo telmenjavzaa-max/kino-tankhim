@@ -102,7 +102,26 @@ select { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); 
 
 dialog { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 14px; padding: 0; width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 40px); }
 dialog::backdrop { background: #000c; }
-#authDlg { width: min(420px, calc(100vw - 32px)); }
+#authDlg, #payDlg { width: min(440px, calc(100vw - 32px)); }
+.pay { padding: 26px; display: grid; gap: 14px; }
+.pay h2 { font-family: var(--display); margin: 0; font-size: 22px; padding-right: 30px; text-wrap: balance; }
+.plan { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; text-align: left; width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+.plan:hover { border-color: var(--brass); }
+.plan b { font-size: 15px; }
+.plan .price { font-family: var(--mono); font-size: 16px; color: var(--brass); font-variant-numeric: tabular-nums; grid-row: span 2; }
+.plan small { color: var(--muted); font-size: 12px; }
+.plan.best { border-color: color-mix(in srgb, var(--brass) 60%, var(--line)); }
+.qr-wrap { display: grid; justify-items: center; gap: 10px; }
+.qr-wrap img { width: min(240px, 100%); aspect-ratio: 1; background: #fff; border-radius: 12px; padding: 10px; }
+.banks { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px; }
+.banks a { display: grid; justify-items: center; gap: 4px; text-decoration: none; color: var(--muted); font-size: 10px; text-align: center; line-height: 1.2; }
+.banks img { width: 44px; height: 44px; border-radius: 10px; background: #fff; }
+.pay-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brass); animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+.access { font-family: var(--mono); font-size: 11px; color: var(--ok); white-space: nowrap; }
+@media (max-width: 640px) { .access { display: none; } }
+@media (hover: hover) and (pointer: fine) { .banks { display: none; } }
 .d-body { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 24px; padding: 24px; }
 .d-body h2 { font-family: var(--display); font-size: 26px; line-height: 1.1; margin: 0 0 8px; text-wrap: balance; padding-right: 30px; }
 .facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; margin: 14px 0; }
@@ -149,6 +168,7 @@ footer .wrap { padding-block: 22px; }
     <div class="brand"><span class="bulbs"><i></i><i></i><i></i></span>Кино Танхим</div>
     <span class="spacer"></span>
     <span class="pill" id="mode">Демо горим</span>
+    <span class="access" id="access" hidden></span>
     <span class="who" id="who" hidden></span>
     <button class="btn primary" id="loginBtn">Нэвтрэх</button>
     <button class="btn ghost" id="logoutBtn" hidden>Гарах</button>
@@ -218,18 +238,23 @@ footer .wrap { padding-block: 22px; }
   </div>
 </dialog>
 
+<dialog id="payDlg" aria-labelledby="pTitle">
+  <button class="close-x" data-close aria-label="Хаах">×</button>
+  <div class="pay" id="payBody"></div>
+</dialog>
+
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 (() => {
   // ---------- Туршилтын кинонууд (Supabase холбогдоогүй үед) ----------
   const SAMPLE = [
-    { id: 1, title: "Талын салхи", year: 2025, genre: "Драм", runtime: 112, hue1: 35, hue2: 15, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/talyn-salkhi-v2.jpg", video_url: "", description: "Хотоос буцаж ирсэн залуу эцгийнхээ адуун сүргийг авч үлдэхийн тулд өвлийн зудтай тэмцэнэ." },
-    { id: 2, title: "Шөнийн Улаанбаатар", year: 2025, genre: "Триллер", runtime: 104, hue1: 350, hue2: 190, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/shoniin-ub.jpg", video_url: "", description: "Утаат өвлийн шөнө такси жолооч санамсаргүйгээр гэмт хэргийн гэрч болж, үүр цайхаас өмнө үнэнийг олох ёстой болно." },
-    { id: 3, title: "Мөнх тэнгэрийн дор", year: 2024, genre: "Түүхэн", runtime: 138, hue1: 215, hue2: 40, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/monkh-tengeriin-dor-v2.jpg", video_url: "", description: "XIII зууны тал нутагт залуу харуул овгуудыг нэгтгэх их аянд өөрийн байр сууриа олно." },
-    { id: 4, title: "Сүүлчийн нүүдэл", year: 2025, genre: "Адал явдалт", runtime: 97, hue1: 25, hue2: 45, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/suulchiin-nuudel-v2.jpg", video_url: "", description: "Малчин гэр бүл ган гачигтай зун Говийг гатлан шинэ нутаг хайж, сүүлчийн удаа нүүнэ." },
-    { id: 5, title: "Хөх толбо", year: 2025, genre: "Инээдмийн", runtime: 92, hue1: 210, hue2: 50, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/khokh-tolbo-v2.jpg", video_url: "", description: "Гэнэт эгчийнхээ хүүхдийг долоо хоног харахаар болсон ганц бие залуугийн инээдтэй адал явдал." },
-    { id: 6, title: "Чимээгүй хөндий", year: 2025, genre: "Аймшгийн", runtime: 99, hue1: 150, hue2: 200, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/chimeegui-khondii-v2.jpg", video_url: "", description: "Уулын хөндийд зуны амралтаараа очсон найзууд хаягдсан гэрээс шөнө бүр гэрэл асахыг анзаарна." }
+    { id: 1, title: "Талын салхи", year: 2025, genre: "Драм", runtime: 112, hue1: 35, hue2: 15, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/talyn-salkhi-v2.jpg", has_video: false, description: "Хотоос буцаж ирсэн залуу эцгийнхээ адуун сүргийг авч үлдэхийн тулд өвлийн зудтай тэмцэнэ." },
+    { id: 2, title: "Шөнийн Улаанбаатар", year: 2025, genre: "Триллер", runtime: 104, hue1: 350, hue2: 190, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/shoniin-ub.jpg", has_video: false, description: "Утаат өвлийн шөнө такси жолооч санамсаргүйгээр гэмт хэргийн гэрч болж, үүр цайхаас өмнө үнэнийг олох ёстой болно." },
+    { id: 3, title: "Мөнх тэнгэрийн дор", year: 2024, genre: "Түүхэн", runtime: 138, hue1: 215, hue2: 40, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/monkh-tengeriin-dor-v2.jpg", has_video: false, description: "XIII зууны тал нутагт залуу харуул овгуудыг нэгтгэх их аянд өөрийн байр сууриа олно." },
+    { id: 4, title: "Сүүлчийн нүүдэл", year: 2025, genre: "Адал явдалт", runtime: 97, hue1: 25, hue2: 45, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/suulchiin-nuudel-v2.jpg", has_video: false, description: "Малчин гэр бүл ган гачигтай зун Говийг гатлан шинэ нутаг хайж, сүүлчийн удаа нүүнэ." },
+    { id: 5, title: "Хөх толбо", year: 2025, genre: "Инээдмийн", runtime: 92, hue1: 210, hue2: 50, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/khokh-tolbo-v2.jpg", has_video: false, description: "Гэнэт эгчийнхээ хүүхдийг долоо хоног харахаар болсон ганц бие залуугийн инээдтэй адал явдал." },
+    { id: 6, title: "Чимээгүй хөндий", year: 2025, genre: "Аймшгийн", runtime: 99, hue1: 150, hue2: 200, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/chimeegui-khondii-v2.jpg", has_video: false, description: "Уулын хөндийд зуны амралтаараа очсон найзууд хаягдсан гэрээс шөнө бүр гэрэл асахыг анзаарна." }
   ];
 
   // ---------- Тохиргоо ----------
@@ -245,7 +270,7 @@ footer .wrap { padding-block: 22px; }
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   };
-  const state = { movies: [], q: "", genre: "Бүгд", sort: store.get("kino.sort", "new"), favOnly: false, user: null, favs: new Set(store.get("kino.favs", [])), current: null, phone: "", pendingPlay: null };
+  const state = { movies: [], q: "", genre: "Бүгд", sort: store.get("kino.sort", "new"), favOnly: false, user: null, favs: new Set(store.get("kino.favs", [])), current: null, phone: "", pendingPlay: null, ents: [], plans: {}, pay: null, payTimer: null };
 
   function toast(text) {
     const t = document.createElement("div");
@@ -273,7 +298,7 @@ footer .wrap { padding-block: 22px; }
   function posterHTML(m, withBadges = true, priority = false) {
     return `<div class="poster" style="--h1:${+m.hue1 || 0};--h2:${+m.hue2 || 220}">
       ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="${esc(m.title)} постер" width="600" height="848" ${priority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}
-      ${withBadges && !m.video_url ? `<span class="soon">Удахгүй</span>` : ""}
+      ${withBadges && !m.has_video ? `<span class="soon">Удахгүй</span>` : ""}
       ${withBadges && state.favs.has(m.id) ? `<span class="fav-mark" title="Миний жагсаалтад">${heart}</span>` : ""}
       <div class="p-title">${esc(m.title)}</div>
       <div class="p-year">${esc(m.year)} · ${esc(m.runtime)} мин</div>
@@ -356,11 +381,11 @@ footer .wrap { padding-block: 22px; }
       : `<div class="empty">${state.favOnly ? "Жагсаалт хоосон байна. Кино нээгээд ☆ товчийг дарна уу." : "Хайлтад тохирох кино олдсонгүй."}</div>`;
   }
 
-  function openMovie(id, play = false) {
+  function openMovie(id, play = false, videoUrl = "") {
     const m = state.movies.find((x) => x.id === id);
     if (!m) return;
     state.current = m;
-    const src = embedUrl(m.video_url);
+    const src = embedUrl(videoUrl);
     const playerHTML = play && src
       ? `<div class="player"><iframe src="${esc(src)}" title="${esc(m.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe></div>`
       : "";
@@ -376,7 +401,7 @@ footer .wrap { padding-block: 22px; }
           </dl>
           <p>${esc(m.description)}</p>
           <div class="actions">
-            ${playerHTML ? "" : `<button class="btn primary" data-play="${m.id}" ${src ? "" : "disabled"}>${src ? "▶ Үзэх" : "Видео удахгүй нэмэгдэнэ"}</button>`}
+            ${playerHTML ? "" : `<button class="btn primary" data-play="${m.id}" ${m.has_video ? "" : "disabled"}>${m.has_video ? (hasAccess(m.id) ? "▶ Үзэх" : "▶ Үзэх · эрх авах") : "Видео удахгүй нэмэгдэнэ"}</button>`}
             <button class="btn" data-fav="${m.id}">${state.favs.has(m.id) ? "★ Жагсаалтаас хасах" : "☆ Миний жагсаалтад"}</button>
           </div>
         </div>
@@ -384,10 +409,103 @@ footer .wrap { padding-block: 22px; }
     const dlg = $("#movieDlg");
     if (!dlg.open) dlg.showModal();
   }
-  function play(id) {
-    if (sb && !state.user) { state.pendingPlay = id; openAuth("Кино үзэхийн тулд нэвтэрнэ үү."); return; }
-    openMovie(id, true);
+  // ---------- Эрх ба QPay төлбөр ----------
+  const fmt = (n) => Number(n).toLocaleString("mn-MN").replace(/\u00a0/g, ",") + "₮";
+  function hasAccess(movieId) {
+    const now = Date.now();
+    return state.ents.some((e) => new Date(e.expires_at).getTime() > now && (e.movie_id == null || e.movie_id === movieId));
   }
+  async function loadAccess() {
+    state.ents = [];
+    if (sb && state.user) {
+      const { data } = await sb.from("entitlements").select("movie_id,expires_at").gt("expires_at", new Date().toISOString());
+      state.ents = data || [];
+    }
+    const sub = state.ents.filter((e) => e.movie_id == null).sort((a, b) => b.expires_at.localeCompare(a.expires_at))[0];
+    $("#access").hidden = !sub;
+    if (sub) $("#access").textContent = "Эрх: " + new Date(sub.expires_at).toLocaleDateString("mn-MN") + " хүртэл";
+  }
+  async function loadPlans() {
+    if (!sb) return;
+    const { data } = await sb.from("plans").select("code,title,amount,hours");
+    (data || []).forEach((p) => { state.plans[p.code] = p; });
+  }
+
+  async function play(id) {
+    const m = state.movies.find((x) => x.id === id);
+    if (!m || !m.has_video) return;
+    if (!sb) return;
+    if (!state.user) { state.pendingPlay = id; openAuth("Кино үзэхийн тулд нэвтэрнэ үү."); return; }
+    const { data } = await sb.from("movie_videos").select("video_url").eq("movie_id", id).maybeSingle();
+    if (data?.video_url) { openMovie(id, true, data.video_url); return; }
+    openPaywall(m);
+  }
+
+  function openPaywall(m) {
+    stopPolling();
+    const sub = state.plans.sub30 || { amount: 9900, hours: 720, title: "30 хоногийн эрх" };
+    const rent = state.plans.rent48 || { amount: 3000, hours: 48 };
+    const rentPrice = m.rent_price || rent.amount;
+    $("#payBody").innerHTML = `
+      <h2 id="pTitle">${esc(m.title)} үзэх</h2>
+      <p class="note">QPay-ээр төлөөд шууд үзнэ. Бүх банкны апп дэмжинэ.</p>
+      <button class="plan best" data-buy="sub30" data-movie="${m.id}">
+        <b>${esc(sub.title)}</b><span class="price">${fmt(sub.amount)}</span>
+        <small>Бүх кино · ${Math.round(sub.hours / 24)} хоног</small>
+      </button>
+      <button class="plan" data-buy="rent48" data-movie="${m.id}">
+        <b>Зөвхөн энэ кино</b><span class="price">${fmt(rentPrice)}</span>
+        <small>${rent.hours} цагийн турш үзнэ</small>
+      </button>
+      <div class="msg" id="payMsg" role="status"></div>`;
+    if ($("#movieDlg").open) $("#movieDlg").close();
+    if (!$("#payDlg").open) $("#payDlg").showModal();
+  }
+
+  async function buy(plan, movieId) {
+    const msg = $("#payMsg");
+    msg.className = "msg"; msg.textContent = "Нэхэмжлэх үүсгэж байна…";
+    document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = true));
+    const { data, error } = await sb.functions.invoke("qpay", { body: { action: "create", plan, movie_id: movieId } });
+    if (error || !data?.payment_id) {
+      let text = error?.message || "Алдаа гарлаа";
+      try { const j = await error.context.json(); if (j?.error) text = j.error; } catch {}
+      msg.className = "msg err"; msg.textContent = "Нэхэмжлэх үүсгэж чадсангүй: " + text;
+      document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = false));
+      return;
+    }
+    const m = state.movies.find((x) => x.id === movieId);
+    $("#payBody").innerHTML = `
+      <h2 id="pTitle">QPay-ээр төлөх · ${fmt(data.amount)}</h2>
+      <p class="note">${esc(data.description)}</p>
+      <div class="qr-wrap">
+        ${data.qr_image ? `<img src="data:image/png;base64,${data.qr_image}" alt="QPay QR код">` : ""}
+        <span class="note">Банкны апп-аараа QR кодыг уншуулна уу</span>
+      </div>
+      ${data.urls?.length ? `<div class="banks">${data.urls.map((u) => `<a href="${esc(u.link)}"><img src="${esc(u.logo)}" alt="" loading="lazy">${esc(u.name)}</a>`).join("")}</div>` : ""}
+      <div class="pay-status"><span class="dot"></span><span id="payState">Төлбөр хүлээж байна…</span></div>
+      <button class="btn primary wide" id="checkPay">Төлсөн — шалгах</button>`;
+    state.pay = { id: data.payment_id, movieId, until: Date.now() + 10 * 60 * 1000 };
+    $("#checkPay").addEventListener("click", () => checkPay(true));
+    state.payTimer = setInterval(() => checkPay(false), 4000);
+  }
+
+  async function checkPay(manual) {
+    const p = state.pay;
+    if (!p) return;
+    if (Date.now() > p.until) { stopPolling(); $("#payState").textContent = "Хугацаа дууслаа. Дахин оролдоно уу."; return; }
+    const { data } = await sb.functions.invoke("qpay", { body: { action: "check", payment_id: p.id } });
+    if (data?.status === "paid") {
+      stopPolling();
+      $("#payDlg").close();
+      toast("Төлбөр амжилттай. Сайхан үзээрэй!");
+      await loadAccess();
+      play(p.movieId);
+    } else if (manual) {
+      $("#payState").textContent = "Төлбөр хараахан ороогүй байна. Хэдэн секундын дараа дахин шалгана уу.";
+    }
+  }
+  function stopPolling() { clearInterval(state.payTimer); state.payTimer = null; }
 
   // ---------- Нэвтрэлт: Google + утас (SMS код) ----------
   function authMsg(text, kind = "") { const m = $("#authMsg"); m.textContent = text; m.className = "msg " + kind; }
@@ -433,12 +551,13 @@ footer .wrap { padding-block: 22px; }
     state.user = user;
     $("#loginBtn").hidden = !!user; $("#logoutBtn").hidden = !user; $("#who").hidden = !user;
     $("#who").textContent = user ? (user.email || user.phone ? (user.email || "+" + user.phone) : "") : "";
-    await loadFavs(); render();
-    if (user && state.pendingPlay) { const id = state.pendingPlay; state.pendingPlay = null; openMovie(id, true); }
+    await Promise.all([loadFavs(), loadAccess()]); render();
+    if (user && state.pendingPlay) { const id = state.pendingPlay; state.pendingPlay = null; play(id); }
   }
 
   // ---------- Үйлдлүүд ----------
   document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-buy]"); if (b) { if (!b.disabled) buy(b.dataset.buy, +b.dataset.movie); return; }
     const p = e.target.closest("[data-play]"); if (p) { if (!p.disabled) play(+p.dataset.play); return; }
     const o = e.target.closest("[data-open]"); if (o) { openMovie(+o.dataset.open); return; }
     const f = e.target.closest("[data-fav]"); if (f) { toggleFav(+f.dataset.fav); return; }
@@ -453,6 +572,7 @@ footer .wrap { padding-block: 22px; }
   $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; store.set("kino.sort", state.sort); render(); });
   $("#favOnly").addEventListener("click", (e) => { state.favOnly = !state.favOnly; e.currentTarget.setAttribute("aria-pressed", state.favOnly); render(); });
   // Видео хаахад тоглуулагчийг зогсооно
+  $("#payDlg").addEventListener("close", () => { stopPolling(); state.pay = null; });
   $("#movieDlg").addEventListener("close", () => { state.current = null; $("#movieBody").innerHTML = ""; });
 
   // ---------- Эхлүүлэх ----------
@@ -460,7 +580,7 @@ footer .wrap { padding-block: 22px; }
     state.movies = SAMPLE; render();
     if (!sb) return;
     $("#mode").textContent = "Шууд"; $("#mode").classList.add("live");
-    state.movies = await loadMovies();
+    [state.movies] = await Promise.all([loadMovies(), loadPlans()]);
     const { data } = await sb.auth.getSession();
     await onUser(data.session?.user || null);
     sb.auth.onAuthStateChange((_e, session) => { if ((session?.user?.id || null) !== (state.user?.id || null)) onUser(session?.user || null); });
