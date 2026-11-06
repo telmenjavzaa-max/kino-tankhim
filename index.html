@@ -133,6 +133,10 @@ nav.tabs button[aria-current="page"]::after { content: ""; position: absolute; l
 .poster .tag { position: absolute; top: 8px; left: 8px; z-index: 3; font-size: 10px; font-weight: 800; padding: 3px 6px; border-radius: 5px; background: #000a; color: #fff; }
 .poster .fav-mark { position: absolute; top: 8px; left: 8px; z-index: 3; width: 24px; height: 24px; border-radius: 50%; background: #000a; display: grid; place-items: center; }
 .poster .fav-mark svg { width: 13px; height: 13px; fill: var(--gold); }
+.card .prog { height: 3px; border-radius: 3px; background: #ffffff22; overflow: hidden; margin-top: -4px; }
+.card .prog i { display: block; height: 100%; background: var(--gold); }
+.card .left { font-size: 12px; color: var(--muted); margin-top: -4px; }
+.player #kp, .player #kp iframe { width: 100%; height: 100%; display: block; border: 0; }
 .card .name { font-weight: 700; font-size: 14px; line-height: 1.3; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- Кинонууд (бүгд) ---------- */
@@ -312,8 +316,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     </div>
     <div>
       <h4>Холбоо барих</h4>
-      <p>Facebook пэйж: <b>Kino tanhim</b></p>
-      <p>Мессежээр холбогдоно уу</p>
+      <p><a id="fbLink" href="#" target="_blank" rel="noopener"><b>Facebook пэйж: Kino tanhim</b></a></p>
+      <p>Асуух зүйлээ пэйж рүү мессежээр бичнэ үү</p>
     </div>
     <div class="fine">© <span id="yr">2026</span> Кино Танхим · <a href="privacy.html">Нууцлалын бодлого</a></div>
   </div>
@@ -413,7 +417,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   };
-  const state = { movies: [], q: "", genre: "Бүгд", sort: store.get("kino.sort", "new"), view: "home", user: null, favs: new Set(store.get("kino.favs", [])), current: null, phone: "", pendingPlay: null, ents: [], plans: {}, pay: null, payTimer: null, hero: 0, heroTimer: null, loaded: false };
+  const state = { movies: [], q: "", genre: "Бүгд", sort: store.get("kino.sort", "new"), view: "home", user: null, favs: new Set(store.get("kino.favs", [])), current: null, phone: "", pendingPlay: null, ents: [], progress: new Map(), plans: {}, kp: null, pay: null, payTimer: null, hero: 0, heroTimer: null, loaded: false };
 
   function toast(text) {
     const t = document.createElement("div");
@@ -448,6 +452,12 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       ${withBadges ? `<div class="info">${esc(m.year)} · ${dur(m.runtime)}</div>` : ""}
     </div>`;
   }
+  const resumeCardHTML = (m) => {
+    const r = state.progress.get(m.id) || {};
+    const total = r.duration_sec || (m.runtime || 0) * 60;
+    const pct = total ? Math.min(100, Math.round((r.position_sec || 0) / total * 100)) : 0;
+    return `<button class="card" data-play="${m.id}" aria-label="${esc(m.title)} — үргэлжлүүлэх">${posterHTML(m)}<div class="prog"><i style="width:${pct}%"></i></div><div class="name">${esc(m.title)}</div><div class="left">${total ? Math.max(1, Math.round((total - (r.position_sec || 0)) / 60)) + " мин үлдсэн" : clock(r.position_sec || 0)}</div></button>`;
+  };
   const cardHTML = (m) => `<button class="card" data-open="${m.id}" aria-label="${esc(m.title)}, ${esc(m.year)}">${posterHTML(m)}<div class="name">${esc(m.title)}</div></button>`;
 
   // ---------- Өгөгдөл ----------
@@ -538,13 +548,13 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     state.heroTimer = setInterval(() => { if (!document.hidden && state.view === "home") showSlide(state.hero + 1); }, 6000);
   }
 
-  function rowHTML(title, list, more) {
+  function rowHTML(title, list, more, resume = false) {
     if (!list.length) return "";
     return `<section class="row">
       <div class="row-head"><h3>${esc(title)}</h3>${more ? `<button data-more="${esc(more)}">Бүгд ›</button>` : ""}</div>
       <div class="track-wrap">
         <button class="arrow l" data-scroll="-1" aria-label="Зүүн">‹</button>
-        <div class="track">${list.map(cardHTML).join("")}</div>
+        <div class="track">${list.map((m) => resume ? resumeCardHTML(m) : cardHTML(m)).join("")}</div>
         <button class="arrow r" data-scroll="1" aria-label="Баруун">›</button>
       </div>
     </section>`;
@@ -553,7 +563,9 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const all = [...state.movies].sort(byNew);
     const ready = all.filter((m) => m.has_video);
     const genres = [...new Set(all.map((m) => m.genre).filter(Boolean))];
-    let html = rowHTML("Шинэ", [...state.movies].sort((a, b) => b.year - a.year || b.id - a.id).slice(0, 18), "browse:Бүгд");
+    const cont = [...state.progress.values()].map((r) => state.movies.find((m) => m.id === r.movie_id)).filter((m) => m && m.has_video);
+    let html = cont.length ? rowHTML("Үргэлжлүүлж үзэх", cont, null, true) : "";
+    html += rowHTML("Шинэ", [...state.movies].sort((a, b) => b.year - a.year || b.id - a.id).slice(0, 18), "browse:Бүгд");
     html += rowHTML("Үзэх боломжтой", ready, "ready");
     if (state.user && state.favs.size) html += rowHTML("Миний жагсаалт", all.filter((m) => state.favs.has(m.id)), "favs");
     const single = []; let genreRows = 0;
@@ -587,15 +599,15 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     render(); scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function openMovie(id, play = false, videoUrl = "") {
+  function openMovie(id, play = false, videoUrl = "", opts = {}) {
     const m = state.movies.find((x) => x.id === id);
     if (!m) return;
     if (!play) track("ViewContent", { content_ids: [String(m.id)], content_name: m.title, content_type: "product", content_category: m.genre || "" });
     state.current = m;
     const src = embedUrl(videoUrl);
-    const playerHTML = play && src
-      ? `<div class="player"><iframe src="${esc(src)}" title="${esc(m.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe></div>`
-      : "";
+    const playerHTML = play && src ? `<div class="player" id="playerBox"></div>` : "";
+    const pr = state.progress.get(m.id);
+    const resumeAt = pr && pr.position_sec > 20 ? pr.position_sec : 0;
     const rentPrice = m.rent_price || rentPlan()?.amount;
     $("#movieBody").innerHTML = `${playerHTML}
       <div class="d-body">
@@ -605,13 +617,111 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
           <div class="facts"><span>${esc(m.year)}</span><span>${esc(m.genre)}</span><span>${dur(m.runtime)}</span>${m.has_video && !hasAccess(m.id) && rentPrice ? `<span>Түрээс ${fmt(rentPrice)} / 48 цаг</span>` : ""}</div>
           <p>${esc(m.description)}</p>
           <div class="actions">
-            ${playerHTML ? "" : `<button class="btn primary" data-play="${m.id}" ${m.has_video ? "" : "disabled"}>${m.has_video ? (hasAccess(m.id) ? "▶ Үзэх" : "▶ Үзэх · эрх авах") : "Видео удахгүй нэмэгдэнэ"}</button>`}
+            ${playerHTML ? "" : `<button class="btn primary" data-play="${m.id}" ${m.has_video ? "" : "disabled"}>${m.has_video ? (hasAccess(m.id) ? (resumeAt ? `▶ Үргэлжлүүлэх · ${clock(resumeAt)}` : "▶ Үзэх") : "▶ Үзэх · эрх авах") : "Видео удахгүй нэмэгдэнэ"}</button>`}
             <button class="btn" data-fav="${m.id}">${state.favs.has(m.id) ? "★ Жагсаалтаас хасах" : "☆ Миний жагсаалтад"}</button>
           </div>
         </div>
       </div>`;
     const dlg = $("#movieDlg");
     if (!dlg.open) dlg.showModal();
+    if (playerHTML) mountPlayer(m, src, opts);
+  }
+
+  // ---------- Тоглуулагч + "Үргэлжлүүлж үзэх" ----------
+  const clock = (t) => { t = Math.floor(t); const h = Math.floor(t / 3600), mm = Math.floor(t % 3600 / 60), ss = t % 60; return (h ? h + ":" + String(mm).padStart(2, "0") : mm) + ":" + String(ss).padStart(2, "0"); };
+  async function loadProgress() {
+    state.progress = new Map();
+    if (!sb || !state.user) return;
+    const { data } = await sb.from("watch_progress").select("movie_id,position_sec,duration_sec,updated_at").order("updated_at", { ascending: false }).limit(30);
+    (data || []).forEach((r) => state.progress.set(r.movie_id, r));
+  }
+  async function saveProgress(movieId, pos, durSec) {
+    if (!sb || !state.user || !(pos >= 0)) return;
+    pos = Math.floor(pos); durSec = durSec > 0 ? Math.floor(durSec) : null;
+    // Бараг дуусгасан бол жагсаалтаас хасна
+    if (durSec && pos > durSec - 90) {
+      state.progress.delete(movieId);
+      await sb.from("watch_progress").delete().eq("user_id", state.user.id).eq("movie_id", movieId);
+      return;
+    }
+    if (pos < 15) return;
+    const row = { user_id: state.user.id, movie_id: movieId, position_sec: pos, duration_sec: durSec, updated_at: new Date().toISOString() };
+    state.progress.set(movieId, row);
+    await sb.from("watch_progress").upsert(row);
+  }
+  const watermarkText = () => {
+    const u = state.user; if (!u) return "";
+    if (u.phone) return "+" + String(u.phone).replace(/^(\d{3})(\d{2})\d{4}(\d{2})$/, "$1 $2••••$3");
+    return String(u.email || "").replace(/^(.{2}).*(@.*)$/, "$1•••$2");
+  };
+  let kinescopeApi = null;
+  function loadKinescopeApi() {
+    if (kinescopeApi) return kinescopeApi;
+    kinescopeApi = new Promise((resolve, reject) => {
+      window.onKinescopeIframeAPIReady = (factory) => resolve(factory);
+      const sc = document.createElement("script");
+      sc.src = "https://player.kinescope.io/latest/iframe.player.js";
+      sc.async = true;
+      sc.onerror = () => { kinescopeApi = null; reject(new Error("kinescope api")); };
+      document.head.appendChild(sc);
+      setTimeout(() => reject(new Error("timeout")), 8000);
+    });
+    return kinescopeApi;
+  }
+  function withParams(url, params) {
+    const u = new URL(url);
+    Object.entries(params).forEach(([k, v]) => { if (v !== "" && v != null) u.searchParams.set(k, v); });
+    return u.href;
+  }
+  async function mountPlayer(m, src, opts = {}) {
+    const box = $("#playerBox"); if (!box) return;
+    const pr = state.progress.get(m.id);
+    const start = pr && pr.position_sec > 20 ? pr.position_sec : 0;
+    const token = opts.token || "";
+    const wm = watermarkText();
+    const isKinescope = /(^|\.)kinescope\.io$/.test(new URL(src).hostname);
+    const fallback = () => {
+      const url = withParams(src, isKinescope ? { t: start || "", drmauthtoken: token, watermark: wm } : {});
+      box.innerHTML = `<iframe src="${esc(url)}" title="${esc(m.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock" allowfullscreen></iframe>`;
+    };
+    if (!isKinescope) { fallback(); return; }
+    try {
+      const factory = await loadKinescopeApi();
+      if (!document.getElementById("playerBox")) return;
+      box.innerHTML = `<div id="kp"></div>`;
+      const player = await factory.create("kp", {
+        url: withParams(src, { drmauthtoken: token }),
+        size: { width: "100%", height: "100%" },
+        behavior: { autoPlay: true, localStorage: false },
+        ui: wm ? { watermark: { text: wm, mode: "random", scale: 0.6 } } : {},
+      });
+      state.kp = { player, movieId: m.id, last: 0, dur: 0 };
+      const E = player.Events || {};
+      const k = state.kp;
+      let seeked = false;
+      player.on(E.Loaded || "loaded", async () => {
+        if (seeked) return; seeked = true;
+        try { k.dur = await player.getDuration(); } catch {}
+        if (start && (!k.dur || start < k.dur - 60)) { try { await player.seekTo(start); } catch {} }
+      });
+      player.on(E.TimeUpdate || "timeupdate", (ev) => {
+        const t = ev?.data?.currentTime; if (!(t >= 0)) return;
+        k.pos = t;
+        if (Date.now() - k.last > 15000) { k.last = Date.now(); saveProgress(m.id, t, k.dur); }
+      });
+      player.on(E.Pause || "pause", () => { if (k.pos) saveProgress(m.id, k.pos, k.dur); });
+      player.on(E.Ended || "ended", () => saveProgress(m.id, k.dur || 1e9, k.dur || 1));
+    } catch (e) {
+      console.warn("Kinescope API ачаалагдсангүй, энгийн iframe ашиглана", e);
+      fallback();
+    }
+  }
+  async function stopPlayer() {
+    const k = state.kp; state.kp = null;
+    if (!k) return;
+    try { const t = await k.player.getCurrentTime(); if (t > 0) await saveProgress(k.movieId, t, k.dur); } catch {}
+    try { k.player.destroy?.(); } catch {}
+    if (state.view === "home") renderRows();
   }
   // ---------- Эрх ба QPay төлбөр ----------
   const fmt = (n) => Number(n).toLocaleString("mn-MN").replace(/\u00a0/g, ",") + "₮";
@@ -649,8 +759,11 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     if (!m || !m.has_video) return;
     if (!sb) return;
     if (!state.user) { state.pendingPlay = id; openAuth("Кино үзэхийн тулд нэвтэрнэ үү."); return; }
-    const { data } = await sb.from("movie_videos").select("video_url").eq("movie_id", id).maybeSingle();
-    if (data?.video_url) { openMovie(id, true, data.video_url); return; }
+    const [{ data }, tok] = await Promise.all([
+      sb.from("movie_videos").select("video_url").eq("movie_id", id).maybeSingle(),
+      sb.rpc("video_token", { p_movie: id }),
+    ]);
+    if (data?.video_url) { openMovie(id, true, data.video_url, { token: tok?.data || "" }); return; }
     openPaywall(m);
   }
 
@@ -821,7 +934,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   async function onUser(user) {
     state.user = user;
-    await Promise.all([loadFavs(), loadAccess()]); render();
+    await Promise.all([loadFavs(), loadAccess(), loadProgress()]); render();
     if (user && state.pendingPlay) { const id = state.pendingPlay; state.pendingPlay = null; play(id); }
   }
 
@@ -863,6 +976,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   $("#promoBuy").addEventListener("click", () => { $("#promoDlg").close(); openSubPaywall(); });
   $("#logoutBtn").addEventListener("click", async () => { $("#menu").hidden = true; await sb?.auth.signOut(); toast("Гарлаа"); });
   $("#yr").textContent = new Date().getFullYear();
+  if (cfg.FB_PAGE_URL) $("#fbLink").href = cfg.FB_PAGE_URL; else $("#fbLink").removeAttribute("href");
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") $("#menu").hidden = true;
     if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName) && !document.querySelector("dialog[open]")) { e.preventDefault(); $("#q").focus(); }
@@ -876,7 +990,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   $("#sort").value = state.sort;
   $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; store.set("kino.sort", state.sort); render(); });
   $("#payDlg").addEventListener("close", () => { stopPolling(); state.pay = null; });
-  $("#movieDlg").addEventListener("close", () => { state.current = null; $("#movieBody").innerHTML = ""; });
+  $("#movieDlg").addEventListener("close", async () => { state.current = null; await stopPlayer(); $("#movieBody").innerHTML = ""; });
+  addEventListener("pagehide", () => { const k = state.kp; if (k?.pos) saveProgress(k.movieId, k.pos, k.dur); });
 
   // ---------- Эхлүүлэх ----------
   (async () => {
