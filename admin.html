@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Кино Танхим — Админ</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#150d11">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23150d11'/%3E%3Ccircle cx='9' cy='16' r='3' fill='%23dcaa4a'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23dcaa4a'/%3E%3Ccircle cx='23' cy='16' r='3' fill='%23dcaa4a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: удирдлагын самбар — дээр нь гарчиг ба таб, доор нь хүснэгт/карт; засварлах цонх dialog-оор */
+:root {
+  --bg: #150d11; --surface: #21141a; --surface-2: #2b1a22; --line: #3d2731;
+  --fg: #f4ebe5; --muted: #b7a1a8; --brass: #dcaa4a; --brass-ink: #1d1206;
+  --ok: #6fbf8e; --warn: #e6b35a; --err: #ff8c95;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+a { color: var(--brass); }
+
+header { border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 5; }
+header .wrap { display: flex; align-items: center; gap: 14px; padding-block: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--display); font-weight: 900; font-size: 18px; text-transform: uppercase; letter-spacing: .04em; }
+.brand small { font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--brass); margin-left: 8px; letter-spacing: .1em; }
+.spacer { flex: 1; }
+.who { color: var(--muted); font-size: 13px; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
+.btn.danger { color: var(--err); }
+.btn.sm { padding: 5px 10px; font-size: 13px; }
+.btn[disabled] { opacity: .5; cursor: default; }
+
+nav.tabs { display: flex; gap: 6px; margin-block: 20px 16px; flex-wrap: wrap; }
+.tab { border: 1px solid var(--line); background: transparent; padding: 8px 16px; border-radius: 99px; color: var(--muted); font-weight: 600; }
+.tab[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.stat .k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.stat .v { font-family: var(--display); font-size: 22px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.toolbar input { flex: 1 1 220px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; min-width: 720px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; background: var(--surface); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.thumb { width: 40px; aspect-ratio: 1 / 1.414; border-radius: 4px; object-fit: cover; background: var(--surface-2); display: block; }
+.pill { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); white-space: nowrap; }
+.pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+.pill.off { color: var(--muted); }
+.empty { padding: 30px; text-align: center; color: var(--muted); }
+
+.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.plan-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 12px; }
+.plan-card h3 { margin: 0; font-family: var(--display); font-size: 16px; font-weight: 500; }
+
+label.f { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+label.f input, label.f select, label.f textarea { padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 14px; width: 100%; }
+label.f textarea { resize: vertical; min-height: 80px; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.hint { font-size: 12px; color: var(--muted); }
+
+dialog { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 14px; padding: 0; width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 40px); }
+dialog::backdrop { background: #000c; }
+.dlg { padding: 22px; display: grid; gap: 14px; }
+.dlg h2 { margin: 0; font-family: var(--display); font-size: 20px; }
+.edit-grid { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 18px; }
+.poster-box { display: grid; gap: 8px; align-content: start; }
+.poster-box img { width: 100%; aspect-ratio: 1 / 1.414; object-fit: cover; border-radius: 8px; background: var(--surface-2); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.msg { font-size: 13px; min-height: 1.2em; }
+.msg.err { color: var(--err); } .msg.ok { color: var(--ok); }
+
+.gate { max-width: 420px; margin: 12vh auto 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 26px; display: grid; gap: 14px; text-align: center; }
+.gate h1 { font-family: var(--display); font-size: 20px; margin: 0; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 50; }
+
+@media (max-width: 640px) { .edit-grid { grid-template-columns: 1fr; } .poster-box { max-width: 160px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">Кино Танхим<small>АДМИН</small></div>
+    <span class="spacer"></span>
+    <a class="btn sm" href="./">← Сайт руу</a>
+    <span class="who" id="who"></span>
+    <button class="btn sm" id="logout" hidden>Гарах</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="gate" id="gate">
+    <h1 id="gateTitle">Ачаалж байна…</h1>
+    <p class="hint" id="gateText"></p>
+    <button class="btn primary" id="gateLogin" hidden>Google-ээр нэвтрэх</button>
+  </section>
+
+  <div id="app" hidden>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="movies" aria-selected="true">Кинонууд</button>
+      <button class="tab" role="tab" data-tab="plans" aria-selected="false">Үнэ</button>
+      <button class="tab" role="tab" data-tab="payments" aria-selected="false">Төлбөр</button>
+    </nav>
+
+    <section id="tab-movies">
+      <div class="toolbar">
+        <input id="mq" type="search" placeholder="Кино хайх…" aria-label="Кино хайх">
+        <button class="btn primary" id="addMovie">+ Кино нэмэх</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th></th><th>Нэр</th><th>Он</th><th>Төрөл</th><th>Видео</th><th>Түрээс</th><th>Төлөв</th><th></th></tr></thead>
+        <tbody id="movieRows"></tbody>
+      </table></div>
+    </section>
+
+    <section id="tab-plans" hidden>
+      <div class="plans" id="planCards"></div>
+    </section>
+
+    <section id="tab-payments" hidden>
+      <div class="stats" id="payStats"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Огноо</th><th>Хэрэглэгч</th><th>Төрөл</th><th>Кино</th><th>Дүн</th><th>Төлөв</th></tr></thead>
+        <tbody id="payRows"></tbody>
+      </table></div>
+    </section>
+  </div>
+</main>
+
+<dialog id="editDlg" aria-labelledby="eTitle">
+  <form class="dlg" id="editForm" novalidate>
+    <h2 id="eTitle">Кино засах</h2>
+    <div class="edit-grid">
+      <div class="poster-box">
+        <img id="ePosterImg" alt="Постер">
+        <label class="btn sm" for="ePosterFile" style="justify-content:center">Постер оруулах</label>
+        <input id="ePosterFile" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        <span class="hint">JPG/PNG/WebP, 5MB хүртэл. Харьцаа ~1:1.41 (A хэмжээ).</span>
+      </div>
+      <div style="display:grid;gap:12px;min-width:0">
+        <label class="f">Нэр<input id="eTitleIn" required maxlength="120"></label>
+        <div class="row">
+          <label class="f">Он<input id="eYear" type="number" min="1900" max="2100"></label>
+          <label class="f">Үргэлжлэх (мин)<input id="eRuntime" type="number" min="1" max="600"></label>
+          <label class="f">Төрөл<input id="eGenre" list="genreList" maxlength="40"></label>
+        </div>
+        <datalist id="genreList"></datalist>
+        <label class="f">Тайлбар<textarea id="eDesc" maxlength="1000"></textarea></label>
+        <label class="f">Видео холбоос (Bunny / Kinescope / Vimeo)
+          <input id="eVideo" type="url" placeholder="https://iframe.mediadelivery.net/embed/…  эсвэл  https://vimeo.com/…">
+        </label>
+        <div class="row">
+          <label class="f">Түрээсийн үнэ (₮, хоосон = үндсэн үнэ)<input id="eRent" type="number" min="1" step="1"></label>
+        </div>
+        <label class="check"><input type="checkbox" id="ePublished"> Сайт дээр харагдана (нийтлэгдсэн)</label>
+        <label class="check"><input type="checkbox" id="eFeatured"> Нүүр хуудсанд онцлох</label>
+      </div>
+    </div>
+    <div class="msg" id="eMsg" role="status"></div>
+    <div class="actions">
+      <button type="button" class="btn danger" id="eDelete">Устгах</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" data-close>Болих</button>
+      <button type="submit" class="btn primary" id="eSave">Хадгалах</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="confirmDlg">
+  <div class="dlg">
+    <h2>Устгах уу?</h2>
+    <p id="confirmText" class="hint"></p>
+    <div class="actions">
+      <button class="btn" data-close>Болих</button>
+      <button class="btn danger" id="confirmYes">Тийм, устгах</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(() => {
+  const cfg = window.KINO_CONFIG || {};
+  const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmt = (n) => Number(n || 0).toLocaleString("en-US") + "₮";
+  const dt = (s) => s ? new Date(s).toLocaleString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+  const state = { movies: [], videos: {}, plans: [], editing: null, posterFile: null };
+
+  function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; d.setAttribute("role", "status"); document.body.appendChild(d); setTimeout(() => d.remove(), 2400); }
+  function gate(title, text, showLogin) { $("#gate").hidden = false; $("#app").hidden = true; $("#gateTitle").textContent = title; $("#gateText").textContent = text || ""; $("#gateLogin").hidden = !showLogin; }
+
+  // ---------- Нэвтрэлт ба эрх ----------
+  $("#gateLogin").addEventListener("click", () => sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } }));
+  $("#logout").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
+
+  async function start() {
+    const { data } = await sb.auth.getSession();
+    const user = data.session?.user;
+    if (!user) return gate("Админ нэвтрэх", "Админ эрхтэй Google аккаунтаараа нэвтэрнэ үү.", true);
+    $("#who").textContent = user.email || user.phone || "";
+    $("#logout").hidden = false;
+    const { data: isAdmin, error } = await sb.rpc("is_admin");
+    if (error || !isAdmin) return gate("Эрх хүрэлцэхгүй", "Энэ аккаунтад админ эрх байхгүй байна.", false);
+    $("#gate").hidden = true; $("#app").hidden = false;
+    await Promise.all([loadMovies(), loadPlans()]);
+  }
+
+  // ---------- Таб ----------
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", x === t));
+    ["movies", "plans", "payments"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
+    if (t.dataset.tab === "payments") loadPayments();
+  }));
+
+  // ---------- Кинонууд ----------
+  async function loadMovies() {
+    const [{ data: movies, error }, { data: vids }] = await Promise.all([
+      sb.from("movies").select("*").order("id", { ascending: false }),
+      sb.from("movie_videos").select("movie_id,video_url"),
+    ]);
+    if (error) { toast("Кино ачаалж чадсангүй: " + error.message); return; }
+    state.movies = movies || [];
+    state.videos = Object.fromEntries((vids || []).map((v) => [v.movie_id, v.video_url]));
+    $("#genreList").innerHTML = [...new Set(state.movies.map((m) => m.genre).filter(Boolean))].map((g) => `<option value="${esc(g)}">`).join("");
+    renderMovies();
+  }
+  function renderMovies() {
+    const q = $("#mq").value.trim().toLowerCase();
+    const rentDefault = state.plans.find((p) => p.code === "rent48")?.amount;
+    const list = state.movies.filter((m) => !q || (m.title || "").toLowerCase().includes(q));
+    $("#movieRows").innerHTML = list.length ? list.map((m) => `
+      <tr>
+        <td>${m.poster_url ? `<img class="thumb" src="${esc(m.poster_url)}" alt="" loading="lazy">` : `<span class="thumb"></span>`}</td>
+        <td><b>${esc(m.title)}</b>${m.featured ? ' <span class="pill warn">онцлох</span>' : ""}</td>
+        <td class="num">${esc(m.year ?? "")}</td>
+        <td>${esc(m.genre ?? "")}</td>
+        <td>${state.videos[m.id] ? '<span class="pill ok">байгаа</span>' : '<span class="pill off">алга</span>'}</td>
+        <td class="num">${m.rent_price ? fmt(m.rent_price) : (rentDefault ? `<span class="hint">${fmt(rentDefault)}</span>` : "—")}</td>
+        <td>${m.published ? '<span class="pill ok">нийтлэгдсэн</span>' : '<span class="pill off">нуусан</span>'}</td>
+        <td><button class="btn sm" data-edit="${m.id}">Засах</button></td>
+      </tr>`).join("") : `<tr><td colspan="8" class="empty">Кино олдсонгүй.</td></tr>`;
+  }
+  $("#mq").addEventListener("input", renderMovies);
+
+  function openEdit(m) {
+    state.editing = m || null; state.posterFile = null;
+    $("#eTitle").textContent = m ? "Кино засах" : "Шинэ кино";
+    $("#eTitleIn").value = m?.title || "";
+    $("#eYear").value = m?.year || new Date().getFullYear();
+    $("#eRuntime").value = m?.runtime || "";
+    $("#eGenre").value = m?.genre || "";
+    $("#eDesc").value = m?.description || "";
+    $("#eVideo").value = m ? (state.videos[m.id] || "") : "";
+    $("#eRent").value = m?.rent_price || "";
+    $("#ePublished").checked = m ? !!m.published : true;
+    $("#eFeatured").checked = !!m?.featured;
+    $("#ePosterImg").src = m?.poster_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E";
+    $("#ePosterFile").value = "";
+    $("#eDelete").hidden = !m;
+    $("#eMsg").textContent = ""; $("#eMsg").className = "msg";
+    $("#editDlg").showModal();
+  }
+  $("#addMovie").addEventListener("click", () => openEdit(null));
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-edit]"); if (b) openEdit(state.movies.find((m) => m.id === +b.dataset.edit));
+    const c = e.target.closest("[data-close]"); if (c) c.closest("dialog").close();
+  });
+
+  $("#ePosterFile").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024) { $("#eMsg").className = "msg err"; $("#eMsg").textContent = "Постер 5MB-аас бага байх ёстой."; e.target.value = ""; return; }
+    state.posterFile = f;
+    $("#ePosterImg").src = URL.createObjectURL(f);
+  });
+
+  function validVideo(url) {
+    if (!url) return true;
+    try { const u = new URL(url); return u.protocol === "https:" && /(vimeo\.com|kinescope\.io|mediadelivery\.net)$/.test(u.hostname.replace(/^www\./, "")); } catch { return false; }
+  }
+
+  $("#editForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = $("#eMsg");
+    const title = $("#eTitleIn").value.trim();
+    const video = $("#eVideo").value.trim();
+    if (!title) { msg.className = "msg err"; msg.textContent = "Киноны нэрийг бичнэ үү."; $("#eTitleIn").focus(); return; }
+    if (!validVideo(video)) { msg.className = "msg err"; msg.textContent = "Видео холбоос Bunny (mediadelivery.net), Kinescope эсвэл Vimeo-гийн https хаяг байх ёстой."; return; }
+    $("#eSave").disabled = true; msg.className = "msg"; msg.textContent = "Хадгалж байна…";
+    try {
+      const row = {
+        title,
+        year: +$("#eYear").value || null,
+        runtime: +$("#eRuntime").value || null,
+        genre: $("#eGenre").value.trim() || null,
+        description: $("#eDesc").value.trim() || null,
+        rent_price: +$("#eRent").value || null,
+        published: $("#ePublished").checked,
+        featured: $("#eFeatured").checked,
+      };
+      if (state.posterFile) {
+        const ext = (state.posterFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await sb.storage.from("posters").upload(path, state.posterFile, { cacheControl: "31536000", contentType: state.posterFile.type });
+        if (upErr) throw new Error("Постер оруулж чадсангүй: " + upErr.message);
+        row.poster_url = sb.storage.from("posters").getPublicUrl(path).data.publicUrl;
+      }
+      let id = state.editing?.id;
+      if (id) {
+        const { error } = await sb.from("movies").update(row).eq("id", id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await sb.from("movies").insert(row).select("id").single();
+        if (error) throw error;
+        id = data.id;
+      }
+      if (row.featured) await sb.from("movies").update({ featured: false }).neq("id", id).eq("featured", true);
+      if (video) {
+        const { error } = await sb.from("movie_videos").upsert({ movie_id: id, video_url: video });
+        if (error) throw error;
+      } else if (state.videos[id]) {
+        const { error } = await sb.from("movie_videos").delete().eq("movie_id", id);
+        if (error) throw error;
+      }
+      $("#editDlg").close();
+      toast(state.editing ? "Хадгалагдлаа" : "Кино нэмэгдлээ");
+      await loadMovies();
+    } catch (err) {
+      msg.className = "msg err"; msg.textContent = err.message || String(err);
+    } finally { $("#eSave").disabled = false; }
+  });
+
+  $("#eDelete").addEventListener("click", () => {
+    const m = state.editing; if (!m) return;
+    $("#confirmText").textContent = `"${m.title}" киног бүр мөсөн устгана. Энэ киноны түрээсийн эрхүүд ч устна. Сайтаас түр нуух бол "нийтлэгдсэн"-ийг болиулахад хангалттай.`;
+    $("#confirmDlg").showModal();
+  });
+  $("#confirmYes").addEventListener("click", async () => {
+    const m = state.editing;
+    const { error } = await sb.from("movies").delete().eq("id", m.id);
+    $("#confirmDlg").close();
+    if (error) { toast("Устгаж чадсангүй: " + error.message); return; }
+    $("#editDlg").close(); toast("Устгагдлаа"); loadMovies();
+  });
+
+  // ---------- Үнэ ----------
+  async function loadPlans() {
+    const { data } = await sb.from("plans").select("*").order("amount", { ascending: false });
+    state.plans = data || [];
+    $("#planCards").innerHTML = state.plans.map((p) => `
+      <form class="plan-card" data-plan="${esc(p.code)}">
+        <h3>${p.code === "sub30" ? "Сарын эрх (бүх кино)" : "Нэг кино түрээслэх"}</h3>
+        <label class="f">Нэр (төлбөрийн цонхонд харагдана)<input name="title" value="${esc(p.title)}" maxlength="60" required></label>
+        <div class="row">
+          <label class="f">Үнэ (₮)<input name="amount" type="number" min="1" step="1" value="${p.amount}" required></label>
+          <label class="f">Хугацаа (цаг)<input name="hours" type="number" min="1" step="1" value="${p.hours}" required></label>
+        </div>
+        <span class="hint">${p.code === "sub30" ? "720 цаг = 30 хоног" : "Кино тус бүр дээр өөр үнэ тавьж болно"}</span>
+        <label class="check"><input type="checkbox" name="active" ${p.active ? "checked" : ""}> Идэвхтэй</label>
+        <div class="actions"><button class="btn primary">Хадгалах</button></div>
+      </form>`).join("");
+    renderMovies();
+  }
+  document.addEventListener("submit", async (e) => {
+    const f = e.target.closest("[data-plan]"); if (!f) return;
+    e.preventDefault();
+    const fd = new FormData(f);
+    const upd = { title: fd.get("title").trim(), amount: +fd.get("amount"), hours: +fd.get("hours"), active: !!fd.get("active") };
+    if (!upd.title || upd.amount < 1 || upd.hours < 1) { toast("Бүх талбарыг зөв бөглөнө үү"); return; }
+    const { error } = await sb.from("plans").update(upd).eq("code", f.dataset.plan);
+    if (error) { toast("Хадгалж чадсангүй: " + error.message); return; }
+    toast("Үнэ шинэчлэгдлээ"); loadPlans();
+  });
+
+  // ---------- Төлбөр ----------
+  async function loadPayments() {
+    const { data, error } = await sb.rpc("admin_payments", { p_limit: 300 });
+    if (error) { toast("Төлбөр ачаалж чадсангүй: " + error.message); return; }
+    const rows = data || [];
+    const paid = rows.filter((r) => r.status === "paid");
+    const month = new Date(); month.setDate(1); month.setHours(0, 0, 0, 0);
+    const paidMonth = paid.filter((r) => new Date(r.paid_at) >= month);
+    const sum = (a) => a.reduce((s, r) => s + r.amount, 0);
+    $("#payStats").innerHTML = [
+      ["Нийт орлого", fmt(sum(paid))],
+      ["Энэ сарын орлого", fmt(sum(paidMonth))],
+      ["Амжилттай төлбөр", paid.length],
+      ["Хүлээгдэж буй", rows.filter((r) => r.status === "pending").length],
+    ].map(([k, v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+    $("#payRows").innerHTML = rows.length ? rows.map((r) => `
+      <tr>
+        <td class="num">${dt(r.paid_at || r.created_at)}</td>
+        <td>${esc(r.user_label)}</td>
+        <td>${r.plan_code === "sub30" ? "Сарын эрх" : "Түрээс"}</td>
+        <td>${esc(r.movie_title || "—")}</td>
+        <td class="num">${fmt(r.amount)}</td>
+        <td>${r.status === "paid" ? '<span class="pill ok">төлсөн</span>' : r.status === "pending" ? '<span class="pill warn">хүлээгдэж буй</span>' : '<span class="pill off">амжилтгүй</span>'}</td>
+      </tr>`).join("") : `<tr><td colspan="6" class="empty">Одоогоор төлбөр алга.</td></tr>`;
+  }
+
+  sb.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") start(); });
+  start();
+})();
+</script>
+</body>
+</html>
