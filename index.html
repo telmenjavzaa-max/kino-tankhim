@@ -487,22 +487,34 @@ footer .wrap { padding-block: 22px; }
       <button class="btn primary wide" id="checkPay">Төлсөн — шалгах</button>`;
     state.pay = { id: data.payment_id, movieId, until: Date.now() + 10 * 60 * 1000 };
     $("#checkPay").addEventListener("click", () => checkPay(true));
-    state.payTimer = setInterval(() => checkPay(false), 4000);
+    state.payTimer = setInterval(() => checkPay(false), 3000);
   }
 
+  // Төлөвийг өөрийн өгөгдлийн сангаас харна (QPay-г callback-аар баталгаажуулна).
+  // "Төлсөн — шалгах" товч л QPay-ээс шууд шалгана.
   async function checkPay(manual) {
     const p = state.pay;
     if (!p) return;
     if (Date.now() > p.until) { stopPolling(); $("#payState").textContent = "Хугацаа дууслаа. Дахин оролдоно уу."; return; }
-    const { data } = await sb.functions.invoke("qpay", { body: { action: "check", payment_id: p.id } });
-    if (data?.status === "paid") {
+    let paid = false;
+    if (manual) {
+      $("#checkPay").disabled = true;
+      const { data } = await sb.functions.invoke("qpay", { body: { action: "check", payment_id: p.id } });
+      paid = data?.status === "paid";
+      setTimeout(() => { const b = $("#checkPay"); if (b) b.disabled = false; }, 30000);
+      if (!paid) $("#payState").textContent = data?.throttled
+        ? "Саяхан шалгасан. Төлбөр орвол энэ цонх өөрөө шинэчлэгдэнэ."
+        : "Төлбөр хараахан ороогүй байна. Төлбөр орвол энэ цонх өөрөө шинэчлэгдэнэ.";
+    } else {
+      const { data } = await sb.from("payments").select("status").eq("id", p.id).maybeSingle();
+      paid = data?.status === "paid";
+    }
+    if (paid) {
       stopPolling();
       $("#payDlg").close();
       toast("Төлбөр амжилттай. Сайхан үзээрэй!");
       await loadAccess();
       play(p.movieId);
-    } else if (manual) {
-      $("#payState").textContent = "Төлбөр хараахан ороогүй байна. Хэдэн секундын дараа дахин шалгана уу.";
     }
   }
   function stopPolling() { clearInterval(state.payTimer); state.payTimer = null; }

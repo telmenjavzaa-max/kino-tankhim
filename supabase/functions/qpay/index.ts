@@ -45,7 +45,10 @@ async function currentUser(req: Request) {
 }
 
 // ---- QPay ----
+// Token-ийг дахин ашиглана (QPay: хүчинтэй token байхад шинээр бүү ав)
+let cached: { token: string; exp: number } | null = null;
 async function qpayToken() {
+  if (cached && Date.now() < cached.exp) return cached.token;
   const user = Deno.env.get("QPAY_USERNAME"), pass = Deno.env.get("QPAY_PASSWORD");
   if (!user || !pass) throw new Error("QPay нууц тохиргоо (QPAY_USERNAME / QPAY_PASSWORD) алга байна");
   const r = await fetch(`${QPAY_BASE}/v2/auth/token`, {
@@ -53,15 +56,23 @@ async function qpayToken() {
     headers: { Authorization: "Basic " + btoa(`${user}:${pass}`), "Content-Type": "application/json" },
   });
   if (!r.ok) throw new Error(`QPay token: ${r.status} ${await r.text()}`);
-  return (await r.json()).access_token as string;
+  const t = await r.json();
+  // expires_in нь секунд эсвэл unix хугацаа байж болно — аль алинд нь 1 минутын нөөцтэй
+  let exp = Date.now() + 25 * 60 * 1000;
+  const e = Number(t.expires_in);
+  if (e > 1e9) exp = e * 1000 - 60_000; else if (e > 60) exp = Date.now() + (e - 60) * 1000;
+  cached = { token: t.access_token, exp };
+  return cached.token;
 }
 
 async function qpay(path: string, token: string, body: unknown) {
-  const r = await fetch(`${QPAY_BASE}${path}`, {
+  const send = (t: string) => fetch(`${QPAY_BASE}${path}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${t}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+  let r = await send(token);
+  if (r.status === 401) { cached = null; r = await send(await qpayToken()); } // хугацаа дууссан token
   const text = await r.text();
   if (!r.ok) throw new Error(`QPay ${path}: ${r.status} ${text}`);
   return JSON.parse(text);
@@ -87,6 +98,8 @@ async function verifyAndGrant(payment: { id: string; amount: number; status: str
   }
   return "pending";
 }
+
+const lastCheck = new Map<string, number>();
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -167,6 +180,10 @@ Deno.serve(async (req: Request) => {
       if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ error: "payment_id" }, 400);
       const [p] = await db(`payments?id=eq.${id}&user_id=eq.${user.id}&select=id,amount,status,qpay_invoice_id`);
       if (!p) return json({ error: "Төлбөр олдсонгүй" }, 404);
+      if (p.status === "paid") return json({ status: "paid" });
+      const last = lastCheck.get(id) || 0;
+      if (Date.now() - last < 30_000) return json({ status: p.status, throttled: true });
+      lastCheck.set(id, Date.now());
       const status = await verifyAndGrant(p);
       return json({ status });
     }
