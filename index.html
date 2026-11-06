@@ -3,10 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Кино Танхим</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Монгол кино онлайнаар үзэх — утас эсвэл Google-ээр нэвтэрнэ">
-<meta name="theme-color" content="#150d11">
+<title>Кино Танхим — Кино онлайнаар үзэх</title>
+<meta name="description" content="Монгол кино онлайнаар үзэх — утас эсвэл Google-ээр нэвтэрч, QPay-ээр төлнө">
+<meta name="theme-color" content="#120a0e">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Кино Танхим">
 <meta property="og:description" content="Монгол кино онлайнаар үзэх — утас эсвэл Google-ээр нэвтэрнэ">
@@ -15,149 +14,179 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23150d11'/%3E%3Ccircle cx='9' cy='16' r='3' fill='%23dcaa4a'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23dcaa4a'/%3E%3Ccircle cx='23' cy='16' r='3' fill='%23dcaa4a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://jaqapcgokfkrioydxgmk.supabase.co" crossorigin>
-<link rel="dns-prefetch" href="https://jaqapcgokfkrioydxgmk.supabase.co">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Manrope:wght@400;600;700;800&display=swap">
 <style>
-/* Layout: кино театрын танхим — дээр нь гэрэлт самбар (онцлох кино), доор нь суудлын эгнээ шиг постер сүлжээ */
 :root {
-  --bg: #150d11;
-  --surface: #21141a;
-  --surface-2: #2b1a22;
-  --line: #3d2731;
-  --fg: #f4ebe5;
-  --muted: #b7a1a8;
-  --brass: #dcaa4a;
-  --brass-ink: #1d1206;
+  --bg: #120a0e;
+  --surface: #1e1218;
+  --surface-2: #2a1921;
+  --line: #34222b;
+  --fg: #f5ece6;
+  --muted: #a8939b;
+  --gold: #e8b45c;
+  --gold-2: #c98f35;
+  --gold-ink: #241505;
   --ok: #6fbf8e;
   --err: #ff8c95;
   --display: "Unbounded", "Arial Black", system-ui, sans-serif;
   --body: "Manrope", "Segoe UI", system-ui, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --radius: 10px;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5; min-height: 100vh; }
 img { max-width: 100%; }
-body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; min-height: 100vh; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
-.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
-:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
-a { color: var(--brass); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+a { color: var(--gold); }
 
-header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-header.top .wrap { display: flex; align-items: center; gap: 14px; padding-block: 12px; flex-wrap: wrap; }
-.brand { font-family: var(--display); font-weight: 900; font-size: 20px; letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-.brand .bulbs { display: inline-flex; gap: 3px; }
-.brand .bulbs i { width: 6px; height: 6px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 6px var(--brass); }
+/* ---------- Толгой ---------- */
+header.top { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(10px); padding-top: env(safe-area-inset-top, 0px); }
+.bar { display: flex; align-items: center; gap: 12px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--fg); font-family: var(--display); font-weight: 800; font-size: 18px; letter-spacing: -.01em; white-space: nowrap; flex: 0 0 auto; }
+.brand .mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(145deg, var(--gold), var(--gold-2)); display: grid; place-items: center; }
+.brand .mark svg { width: 18px; height: 18px; fill: var(--gold-ink); }
+.brand b { color: var(--gold); font-weight: 800; }
 .spacer { flex: 1; }
-.pill { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
-.pill.live { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
-.who { font-size: 13px; color: var(--muted); max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.btn { border: 1px solid var(--line); background: var(--surface); padding: 9px 15px; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.search { position: relative; flex: 0 1 280px; min-width: 0; }
+.search input { width: 100%; height: 38px; padding: 0 38px 0 16px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: 14px; }
+.search input::placeholder { color: var(--muted); }
+.search svg { position: absolute; right: 13px; top: 50%; translate: 0 -50%; width: 16px; height: 16px; stroke: var(--muted); pointer-events: none; }
+.icon-btn { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; padding: 0; font-weight: 800; font-size: 14px; }
+.icon-btn svg { width: 18px; height: 18px; stroke: var(--fg); fill: none; }
+.icon-btn.on { background: var(--surface-2); border-color: var(--gold-2); color: var(--gold); }
+.vip { flex: 0 0 auto; height: 38px; padding: 0 16px; border-radius: 99px; border: 0; background: linear-gradient(180deg, var(--gold), var(--gold-2)); color: var(--gold-ink); font-weight: 800; font-size: 14px; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.vip svg { width: 16px; height: 16px; fill: var(--gold-ink); }
+.vip .lbl-short { display: none; }
+.vip.has { background: var(--surface-2); color: var(--gold); border: 1px solid var(--gold-2); }
+.vip.has svg { fill: var(--gold); }
+nav.tabs { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; height: 40px; align-items: center; }
+nav.tabs::-webkit-scrollbar { display: none; }
+nav.tabs button { border: 0; background: none; padding: 6px 0; color: var(--muted); font-weight: 700; font-size: 14px; white-space: nowrap; position: relative; }
+nav.tabs button[aria-current="page"] { color: var(--fg); font-size: 15px; }
+nav.tabs button[aria-current="page"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--gold); }
+
+.menu { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(56px + env(safe-area-inset-top, 0px)); width: 240px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px; box-shadow: 0 20px 40px -12px #000c; z-index: 40; }
+.menu .who { padding: 8px 10px 4px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu .access { padding: 0 10px 8px; font-size: 12px; color: var(--ok); }
+.menu button { width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 8px; font-weight: 600; }
+.menu button:hover { background: var(--surface-2); }
+
+/* ---------- Слайдер ---------- */
+.hero { position: relative; margin-top: 8px; height: clamp(300px, 44vw, 460px); border-radius: 16px; overflow: hidden; background: var(--surface); isolation: isolate; }
+.slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; cursor: pointer; }
+.slide.on { opacity: 1; visibility: visible; }
+.slide .bg { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(34px) saturate(1.2) brightness(.5); transform: scale(1.08); }
+.slide .art { position: absolute; left: 50%; top: 0; height: 100%; width: auto; max-width: none; translate: -50% 0; box-shadow: 0 0 80px 10px #0009; }
+.slide::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, #000c 0%, transparent 45%), linear-gradient(90deg, #0008 0%, transparent 40%); pointer-events: none; }
+.slide .cap { position: absolute; left: 24px; right: 24px; bottom: 36px; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.slide h2 { font-family: var(--display); font-weight: 800; font-size: clamp(20px, 3vw, 34px); line-height: 1.1; margin: 0; text-wrap: balance; text-shadow: 0 2px 14px #000a; }
+.slide .sub { color: #e5d6cf; font-size: 13px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.slide .go { flex: 0 0 auto; display: flex; gap: 8px; }
+.dots { position: absolute; left: 50%; translate: -50% 0; bottom: 14px; z-index: 3; display: flex; gap: 6px; }
+.dots button { width: 7px; height: 7px; padding: 0; border-radius: 99px; border: 0; background: #ffffff55; transition: width .3s; }
+.dots button[aria-current="true"] { width: 22px; background: var(--fg); }
+.hero .nav { position: absolute; top: 50%; translate: 0 -50%; z-index: 3; width: 40px; height: 40px; border-radius: 50%; border: 0; background: #0007; color: #fff; font-size: 20px; display: grid; place-items: center; opacity: 0; transition: opacity .2s; }
+.hero:hover .nav { opacity: 1; }
+.hero .nav.prev { left: 12px; } .hero .nav.next { right: 12px; }
+
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 10px 16px; border-radius: 99px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
 .btn:hover { border-color: var(--muted); }
-.btn.primary { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
-.btn.primary:hover { filter: brightness(1.08); }
+.btn.primary { background: linear-gradient(180deg, var(--gold), var(--gold-2)); color: var(--gold-ink); border-color: transparent; }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.glass { background: #ffffff1f; border-color: #ffffff30; backdrop-filter: blur(6px); }
 .btn.ghost { background: transparent; }
 .btn.wide { width: 100%; }
 .btn[disabled] { opacity: .55; cursor: default; }
 
-/* Hero: бүдэг постер арын дэвсгэр + театрын гэрлийн цэгүүд */
-.marquee { margin-block: 24px 8px; display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 36px; align-items: center; padding: 32px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); position: relative; overflow: hidden; isolation: isolate; min-height: 380px; }
-.marquee .backdrop { position: absolute; inset: -40px; z-index: -2; background-size: cover; background-position: center; filter: blur(38px) saturate(1.25) brightness(.55); transform: scale(1.1); }
-.marquee::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 30%, transparent) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 55%, var(--bg) 100%); }
-.marquee::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 10px; pointer-events: none; background-image: radial-gradient(circle, var(--brass) 2px, transparent 2.6px); background-size: 22px 10px; opacity: .55; }
-.marquee .poster { box-shadow: 0 30px 60px -20px #000c, 0 0 0 1px #ffffff14; }
-.price-line { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 14px; letter-spacing: .04em; }
-.price-line b { color: var(--brass); font-weight: 500; }
+/* ---------- Эгнээ ---------- */
+.row { margin-top: 34px; }
+.row-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.row-head h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 19px; }
+.row-head button { border: 0; background: none; color: var(--muted); font-size: 13px; font-weight: 700; padding: 4px 0; }
+.row-head button:hover { color: var(--gold); }
+.track-wrap { position: relative; }
+.track { display: grid; grid-auto-flow: column; grid-auto-columns: 184px; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; }
+.track::-webkit-scrollbar { display: none; }
+.track > * { scroll-snap-align: start; }
+.arrow { position: absolute; top: 38%; translate: 0 -50%; z-index: 4; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 85%, transparent); font-size: 18px; display: grid; place-items: center; opacity: 0; transition: opacity .2s; }
+.track-wrap:hover .arrow { opacity: 1; }
+.arrow.l { left: -14px; } .arrow.r { right: -14px; }
+@media (hover: none) { .arrow, .hero .nav { display: none; } }
 
-/* Сарын эрхийн зурвас */
-.promo { margin-block: 18px 6px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 16px 20px; border-radius: 14px; border: 1px dashed color-mix(in srgb, var(--brass) 55%, var(--line)); background: linear-gradient(90deg, color-mix(in srgb, var(--brass) 12%, var(--surface)), var(--surface)); }
-.promo .ticket { font-family: var(--display); font-weight: 700; font-size: 18px; line-height: 1.2; }
-.promo .ticket span { color: var(--brass); }
-.promo .sub { color: var(--muted); font-size: 13px; }
-.promo .grow { flex: 1 1 260px; min-width: 0; }
-.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
-.marquee h1 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4.4vw, 46px); line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
-.marquee p { color: var(--muted); max-width: 60ch; margin: 0 0 16px; }
-.actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; }
+.card { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.poster { position: relative; aspect-ratio: 1 / 1.414; width: 100%; border-radius: var(--radius); overflow: hidden; background: linear-gradient(160deg, hsl(var(--h1) 55% 40%), hsl(var(--h2) 60% 13%)); display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; isolation: isolate; transition: transform .25s ease, box-shadow .25s ease; }
+.poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform .4s ease; }
+.card:hover .poster, .card:focus-visible .poster { transform: translateY(-3px); box-shadow: 0 16px 30px -14px #000; }
+.card:hover .poster img { transform: scale(1.04); }
+.poster .p-title { font-family: var(--display); font-weight: 800; font-size: 16px; line-height: 1.05; text-transform: uppercase; color: #fff; text-wrap: balance; overflow-wrap: anywhere; margin-bottom: 30px; }
+.poster .info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 26px 10px 9px; background: linear-gradient(0deg, #000d, transparent); font-size: 12px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge { position: absolute; top: 8px; right: 8px; z-index: 3; font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 3px 7px; border-radius: 5px; background: linear-gradient(180deg, var(--gold), var(--gold-2)); color: var(--gold-ink); }
+.badge.soon { background: #000b; color: #fff; }
+.badge.open { background: var(--ok); color: #082012; }
+.poster .tag { position: absolute; top: 8px; left: 8px; z-index: 3; font-size: 10px; font-weight: 800; padding: 3px 6px; border-radius: 5px; background: #000a; color: #fff; }
+.poster .fav-mark { position: absolute; top: 8px; left: 8px; z-index: 3; width: 24px; height: 24px; border-radius: 50%; background: #000a; display: grid; place-items: center; }
+.poster .fav-mark svg { width: 13px; height: 13px; fill: var(--gold); }
+.card .name { font-weight: 700; font-size: 14px; line-height: 1.3; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-block: 24px 14px; }
-.search { flex: 1 1 260px; position: relative; }
-.search input { width: 100%; padding: 11px 14px 11px 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
-.search svg { position: absolute; left: 12px; top: 50%; translate: 0 -50%; width: 16px; height: 16px; stroke: var(--muted); }
-select { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.chip { border: 1px solid var(--line); background: transparent; padding: 6px 12px; border-radius: 99px; font-size: 13px; color: var(--muted); }
-.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-.count { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+/* ---------- Кинонууд (бүгд) ---------- */
+.browse-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-block: 26px 14px; }
+.browse-head h1 { font-family: var(--display); font-weight: 600; font-size: 22px; margin: 0; }
+.browse-head .ctl { display: flex; gap: 10px; align-items: center; }
+select { height: 36px; padding: 0 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-bottom: 20px; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: 0 0 auto; border: 1px solid var(--line); background: var(--surface); padding: 7px 14px; border-radius: 99px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+.count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 14px; }
+.empty { padding: 44px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; grid-column: 1 / -1; }
+main { padding-bottom: 56px; }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 18px; margin-bottom: 60px; }
-.card { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.card:hover .poster, .card:focus-visible .poster { transform: translateY(-4px); box-shadow: 0 18px 34px -14px #000; }
-.poster .hover { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 14px; background: linear-gradient(180deg, transparent 30%, #000d 100%); opacity: 0; transition: opacity .2s ease; }
-.poster .hover .play { align-self: center; margin-bottom: auto; margin-top: auto; width: 54px; height: 54px; border-radius: 50%; background: var(--brass); color: var(--brass-ink); display: grid; place-items: center; font-size: 20px; box-shadow: 0 8px 24px -6px #000; }
-.poster .hover p { margin: 0; font-size: 12px; line-height: 1.4; color: #fff; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.card:hover .poster .hover, .card:focus-visible .poster .hover { opacity: 1; }
-@media (hover: none) { .poster .hover { display: none; } }
-.poster .ready { position: absolute; left: 10px; top: 10px; z-index: 2; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: var(--brass); color: var(--brass-ink); padding: 3px 7px; border-radius: 4px; font-weight: 500; }
-.card .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
-.card .name { font-weight: 700; font-size: 15px; line-height: 1.3; color: var(--fg); }
-.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-
-.poster { position: relative; aspect-ratio: 1 / 1.414; width: 100%; max-width: 100%; border-radius: var(--radius); overflow: hidden; background: linear-gradient(160deg, hsl(var(--h1) 55% 42%), hsl(var(--h2) 60% 14%)); display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; transition: transform .2s ease, box-shadow .2s ease; isolation: isolate; }
-.poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 1; }
-.poster .p-title { font-family: var(--display); font-weight: 900; font-size: clamp(16px, 1.6vw, 20px); line-height: 1.05; text-transform: uppercase; color: #fff; text-wrap: balance; overflow-wrap: anywhere; text-shadow: 0 2px 12px #0007; }
-.poster .p-year { font-family: var(--mono); font-size: 11px; color: #ffffffcc; margin-top: 6px; letter-spacing: .08em; }
-.poster .fav-mark { position: absolute; bottom: 10px; right: 10px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: #000a; display: grid; place-items: center; }
-.poster .fav-mark svg { width: 15px; height: 15px; fill: var(--brass); }
-.poster .soon { position: absolute; left: 10px; bottom: 10px; z-index: 2; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: #000b; color: #fff; padding: 3px 7px; border-radius: 4px; }
-.empty { padding: 40px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; grid-column: 1 / -1; }
-
-dialog { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 14px; padding: 0; width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 40px); }
-dialog::backdrop { background: #000c; }
-#authDlg, #payDlg { width: min(440px, calc(100vw - 32px)); }
+/* ---------- Цонхнууд ---------- */
+dialog { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 16px; padding: 0; width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 40px); }
+dialog::backdrop { background: #000c; backdrop-filter: blur(3px); }
+#authDlg, #payDlg, #promoDlg { width: min(440px, calc(100vw - 32px)); }
 .pay { padding: 26px; display: grid; gap: 14px; }
-.pay h2 { font-family: var(--display); margin: 0; font-size: 22px; padding-right: 30px; text-wrap: balance; }
-.plan { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; text-align: left; width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
-.plan:hover { border-color: var(--brass); }
+.pay h2 { font-family: var(--display); margin: 0; font-size: 21px; padding-right: 30px; text-wrap: balance; }
+.plan { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; text-align: left; width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); }
+.plan:hover { border-color: var(--gold); }
 .plan b { font-size: 15px; }
-.plan .price { font-family: var(--mono); font-size: 16px; color: var(--brass); font-variant-numeric: tabular-nums; grid-row: span 2; }
+.plan .price { font-size: 17px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; grid-row: span 2; }
 .plan small { color: var(--muted); font-size: 12px; }
-.plan.best { border-color: color-mix(in srgb, var(--brass) 60%, var(--line)); }
+.plan.best { border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); }
 .qr-wrap { display: grid; justify-items: center; gap: 10px; }
 .qr-wrap img { width: min(240px, 100%); aspect-ratio: 1; background: #fff; border-radius: 12px; padding: 10px; }
 .banks { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px; }
 .banks a { display: grid; justify-items: center; gap: 4px; text-decoration: none; color: var(--muted); font-size: 10px; text-align: center; line-height: 1.2; }
 .banks img { width: 44px; height: 44px; border-radius: 10px; background: #fff; }
 .pay-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brass); animation: pulse 1.2s infinite; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s infinite; }
 @keyframes pulse { 50% { opacity: .25; } }
-.access { font-family: var(--mono); font-size: 11px; color: var(--ok); white-space: nowrap; }
-@media (max-width: 640px) { .access { display: none; } }
 @media (hover: hover) and (pointer: fine) { .banks { display: none; } }
 .d-body { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 24px; padding: 24px; }
-.d-body h2 { font-family: var(--display); font-size: 26px; line-height: 1.1; margin: 0 0 8px; text-wrap: balance; padding-right: 30px; }
-.facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; margin: 14px 0; }
-.facts dt { color: var(--muted); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding-top: 2px; }
-.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.d-body h2 { font-family: var(--display); font-size: 25px; line-height: 1.1; margin: 0 0 8px; text-wrap: balance; padding-right: 30px; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+.facts span { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: var(--surface-2); color: #e0cfc8; }
 .close-x { position: absolute; top: 10px; right: 10px; z-index: 3; border: 0; background: var(--surface-2); width: 34px; height: 34px; border-radius: 50%; font-size: 18px; }
-.player { aspect-ratio: 16 / 9; width: 100%; max-width: 100%; background: #000; border-bottom: 1px solid var(--line); }
+.player { aspect-ratio: 16 / 9; width: 100%; background: #000; border-bottom: 1px solid var(--line); }
 .player iframe { width: 100%; height: 100%; border: 0; display: block; }
-.note { font-size: 13px; color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); margin: 0; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .auth { padding: 26px; display: grid; gap: 14px; }
 .auth h2 { font-family: var(--display); margin: 0; font-size: 22px; }
 .auth label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-.auth input { width: 100%; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+.auth input { width: 100%; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
 .phone-row { display: flex; gap: 8px; }
-.phone-row .cc { flex: 0 0 auto; padding: 11px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); font-family: var(--mono); }
-.phone-row input { flex: 1; min-width: 0; font-family: var(--mono); letter-spacing: .04em; }
+.phone-row .cc { flex: 0 0 auto; padding: 11px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); font-weight: 700; }
+.phone-row input { flex: 1; min-width: 0; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
 .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .g-logo { width: 18px; height: 18px; }
@@ -165,25 +194,44 @@ dialog::backdrop { background: #000c; }
 .msg.err { color: var(--err); }
 .msg.ok { color: var(--ok); }
 
-.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 50; }
-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; margin-top: 20px; }
-footer .wrap { padding-block: 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px 32px; }
-footer h4 { margin: 0 0 8px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--fg); }
+/* Анх орсон хүнд үзүүлэх санал */
+.promo-top { position: relative; height: 150px; overflow: hidden; background: radial-gradient(120% 90% at 50% 110%, color-mix(in srgb, var(--gold) 45%, transparent), transparent 60%), linear-gradient(180deg, #2a1520, var(--surface)); display: grid; place-items: center; }
+.promo-top .reel { display: flex; gap: 10px; transform: rotate(-6deg); }
+.promo-top .reel img, .promo-top .reel i { width: 72px; aspect-ratio: 1 / 1.414; border-radius: 8px; object-fit: cover; box-shadow: 0 10px 24px -8px #000; display: block; background: var(--surface-2); }
+.promo-top .reel :nth-child(2) { translate: 0 -12px; }
+.promo-body { padding: 18px 24px 24px; display: grid; gap: 12px; }
+.promo-body h2 { font-family: var(--display); font-size: 21px; line-height: 1.2; margin: 0; color: var(--gold); text-wrap: balance; }
+.promo-list { display: grid; }
+.promo-list div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 14px; }
+.promo-list div:last-child { border-bottom: 0; }
+.promo-list b { color: var(--gold); font-variant-numeric: tabular-nums; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 700; z-index: 60; }
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+footer .wrap { padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px 32px; }
+footer h4 { margin: 0 0 8px; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--fg); }
 footer p { margin: 0 0 4px; }
 footer a { color: var(--muted); }
-footer a:hover { color: var(--brass); }
+footer a:hover { color: var(--gold); }
 footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 16px; font-size: 12px; }
 
-@media (max-width: 640px) {
-  .marquee { grid-template-columns: minmax(0, 120px) minmax(0, 1fr); gap: 16px; padding: 20px 16px 16px; min-height: 0; }
-  .marquee::after { background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 40%, transparent), var(--bg)); }
-  .promo .ticket { font-size: 16px; }
-  .marquee p { display: none; }
-  .d-body { grid-template-columns: 1fr; }
-  .d-body .poster { max-width: 180px; }
-  .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 18px 12px; }
-  .who { display: none; }
+@media (max-width: 720px) {
+  .bar { gap: 8px; height: 56px; }
+  .search { flex: 1 1 auto; }
+  .vip .lbl-long { display: none; }
+  .vip .lbl-short { display: inline; }
+  .poster .info { font-size: 11px; padding-inline: 8px; }
+  .vip { padding: 0 12px; }
+  .hero { border-radius: 12px; height: 106vw; max-height: 520px; }
+  .slide .cap { left: 16px; right: 16px; bottom: 34px; flex-direction: column; align-items: flex-start; }
+  .track { grid-auto-columns: 132px; gap: 10px; }
+  .row { margin-top: 26px; }
+  .row-head h3 { font-size: 16px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 18px 10px; }
+  .d-body { grid-template-columns: 1fr; padding: 20px; }
+  .d-body .poster { max-width: 170px; }
 }
+@media (max-width: 420px) { .brand .txt { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -191,42 +239,62 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="bulbs"><i></i><i></i><i></i></span>Кино Танхим</div>
-    <span class="spacer"></span>
-    <span class="pill" id="mode" hidden>Демо горим</span>
-    <span class="access" id="access" hidden></span>
-    <span class="who" id="who" hidden></span>
-    <button class="btn primary" id="loginBtn">Нэвтрэх</button>
-    <button class="btn ghost" id="logoutBtn" hidden>Гарах</button>
+    <div class="bar">
+      <a class="brand" href="./" aria-label="Кино Танхим нүүр">
+        <span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v2H4zM5 9h14l-1 10H6zM9 11v6l5-3z" fill-rule="evenodd"/></svg></span>
+        <span class="txt">Кино<b>Танхим</b></span>
+      </a>
+      <span class="spacer"></span>
+      <label class="search">
+        <input id="q" type="search" placeholder="Кино хайх" aria-label="Кино хайх" autocomplete="off">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </label>
+      <button class="icon-btn" id="userBtn" aria-label="Нэвтрэх" aria-haspopup="true"><svg viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+      <button class="vip" id="vipBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg><span id="vipLbl"><span class="lbl-long">Эрх авах</span><span class="lbl-short">VIP</span></span></button>
+    </div>
+    <nav class="tabs" aria-label="Цэс">
+      <button data-view="home" aria-current="page">Нүүр</button>
+      <button data-view="browse">Кинонууд</button>
+      <button data-view="ready">Үзэх боломжтой</button>
+      <button data-view="favs">Миний жагсаалт</button>
+      <button id="plansTab">Багц</button>
+    </nav>
+  </div>
+  <div class="menu" id="menu" hidden>
+    <div class="who" id="who"></div>
+    <div class="access" id="access" hidden></div>
+    <button data-view="favs">★ Миний жагсаалт</button>
+    <button id="menuPlans">Эрх сунгах</button>
+    <button id="logoutBtn">Гарах</button>
   </div>
 </header>
 
 <main class="wrap">
-  <section class="marquee" id="featured" aria-label="Онцлох кино"></section>
-
-  <section class="promo" id="promo" aria-label="Сарын эрх">
-    <div class="grow">
-      <div class="ticket">Бүх кино · 30 хоног · <span id="promoPrice">9,900₮</span></div>
-      <div class="sub">QPay-ээр 1 минутад. Хаан, Голомт, ХАС, Төрийн банк болон бүх банкны апп.</div>
-    </div>
-    <button class="btn primary" id="promoBtn">Эрх авах</button>
-  </section>
-
-  <div class="controls">
-    <label class="search">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Кино хайх…" aria-label="Хайх">
-    </label>
-    <select id="sort" aria-label="Эрэмбэлэх">
-      <option value="new">Шинэ нь эхэнд</option>
-      <option value="title">Нэрээр (А–Я)</option>
-      <option value="runtime">Богино нь эхэнд</option>
-    </select>
-    <button class="chip" id="favOnly" aria-pressed="false">★ Миний жагсаалт</button>
+  <div id="homeView">
+    <section class="hero" id="hero" aria-roledescription="carousel" aria-label="Онцлох кинонууд">
+      <div id="slides"></div>
+      <button class="nav prev" id="hPrev" aria-label="Өмнөх">‹</button>
+      <button class="nav next" id="hNext" aria-label="Дараах">›</button>
+      <div class="dots" id="dots"></div>
+    </section>
+    <div id="rows"></div>
   </div>
-  <div class="chips" id="genres" role="group" aria-label="Төрөл"></div>
-  <div class="count" id="count"></div>
-  <div class="grid" id="grid"></div>
+
+  <div id="browseView" hidden>
+    <div class="browse-head">
+      <h1 id="browseTitle">Кинонууд</h1>
+      <div class="ctl">
+        <span class="count" id="count"></span>
+        <select id="sort" aria-label="Эрэмбэлэх">
+          <option value="new">Шинэ нь эхэнд</option>
+          <option value="title">Нэрээр (А–Я)</option>
+          <option value="runtime">Богино нь эхэнд</option>
+        </select>
+      </div>
+    </div>
+    <div class="chips" id="genres" role="group" aria-label="Төрөл"></div>
+    <div class="grid" id="grid"></div>
+  </div>
 </main>
 
 <footer>
@@ -245,9 +313,20 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       <p>Facebook пэйж: <b>Kino tanhim</b></p>
       <p>Мессежээр холбогдоно уу</p>
     </div>
-    <div class="fine">© <span id="yr">2026</span> Кино Танхим · <a href="privacy.html">Нууцлалын бодлого</a><span id="src" hidden>туршилтын жишээ</span></div>
+    <div class="fine">© <span id="yr">2026</span> Кино Танхим · <a href="privacy.html">Нууцлалын бодлого</a></div>
   </div>
 </footer>
+
+<dialog id="promoDlg" aria-labelledby="promoTitle">
+  <button class="close-x" data-close aria-label="Хаах">×</button>
+  <div class="promo-top" id="promoArt"></div>
+  <div class="promo-body">
+    <h2 id="promoTitle">Бүх кино нэг эрхээр</h2>
+    <p class="note">Сайт дээрх бүх киног хязгааргүй үзнэ. QPay-ээр 1 минутад идэвхжинэ.</p>
+    <div class="promo-list" id="promoList"></div>
+    <button class="btn primary wide" id="promoBuy">Эрх авах</button>
+  </div>
+</dialog>
 
 <dialog id="movieDlg" aria-labelledby="dTitle">
   <button class="close-x" data-close aria-label="Хаах">×</button>
@@ -300,13 +379,14 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 <script>
 (() => {
   // ---------- Туршилтын кинонууд (Supabase холбогдоогүй үед) ----------
+  const P = "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/";
   const SAMPLE = [
-    { id: 1, title: "Талын салхи", year: 2025, genre: "Драм", runtime: 112, hue1: 35, hue2: 15, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/talyn-salkhi-v2.jpg", has_video: false, description: "Хотоос буцаж ирсэн залуу эцгийнхээ адуун сүргийг авч үлдэхийн тулд өвлийн зудтай тэмцэнэ." },
-    { id: 2, title: "Шөнийн Улаанбаатар", year: 2025, genre: "Триллер", runtime: 104, hue1: 350, hue2: 190, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/shoniin-ub.jpg", has_video: false, description: "Утаат өвлийн шөнө такси жолооч санамсаргүйгээр гэмт хэргийн гэрч болж, үүр цайхаас өмнө үнэнийг олох ёстой болно." },
-    { id: 3, title: "Мөнх тэнгэрийн дор", year: 2024, genre: "Түүхэн", runtime: 138, hue1: 215, hue2: 40, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/monkh-tengeriin-dor-v2.jpg", has_video: false, description: "XIII зууны тал нутагт залуу харуул овгуудыг нэгтгэх их аянд өөрийн байр сууриа олно." },
-    { id: 4, title: "Сүүлчийн нүүдэл", year: 2025, genre: "Адал явдалт", runtime: 97, hue1: 25, hue2: 45, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/suulchiin-nuudel-v2.jpg", has_video: false, description: "Малчин гэр бүл ган гачигтай зун Говийг гатлан шинэ нутаг хайж, сүүлчийн удаа нүүнэ." },
-    { id: 5, title: "Хөх толбо", year: 2025, genre: "Инээдмийн", runtime: 92, hue1: 210, hue2: 50, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/khokh-tolbo-v2.jpg", has_video: false, description: "Гэнэт эгчийнхээ хүүхдийг долоо хоног харахаар болсон ганц бие залуугийн инээдтэй адал явдал." },
-    { id: 6, title: "Чимээгүй хөндий", year: 2025, genre: "Аймшгийн", runtime: 99, hue1: 150, hue2: 200, poster_url: "https://jaqapcgokfkrioydxgmk.supabase.co/storage/v1/object/public/posters/chimeegui-khondii-v2.jpg", has_video: false, description: "Уулын хөндийд зуны амралтаараа очсон найзууд хаягдсан гэрээс шөнө бүр гэрэл асахыг анзаарна." }
+    { id: 1, title: "Талын салхи", year: 2025, genre: "Драм", runtime: 112, hue1: 35, hue2: 15, poster_url: P + "talyn-salkhi-v2.jpg", has_video: false, description: "Хотоос буцаж ирсэн залуу эцгийнхээ адуун сүргийг авч үлдэхийн тулд өвлийн зудтай тэмцэнэ." },
+    { id: 2, title: "Шөнийн Улаанбаатар", year: 2025, genre: "Триллер", runtime: 104, hue1: 350, hue2: 190, poster_url: P + "shoniin-ub.jpg", has_video: false, description: "Утаат өвлийн шөнө такси жолооч санамсаргүйгээр гэмт хэргийн гэрч болно." },
+    { id: 3, title: "Мөнх тэнгэрийн дор", year: 2024, genre: "Түүхэн", runtime: 138, hue1: 215, hue2: 40, poster_url: P + "monkh-tengeriin-dor-v2.jpg", has_video: false, description: "XIII зууны тал нутагт залуу харуул овгуудыг нэгтгэх их аянд өөрийн байр сууриа олно." },
+    { id: 4, title: "Сүүлчийн нүүдэл", year: 2025, genre: "Адал явдалт", runtime: 97, hue1: 25, hue2: 45, poster_url: P + "suulchiin-nuudel-v2.jpg", has_video: false, description: "Малчин гэр бүл ган гачигтай зун Говийг гатлан шинэ нутаг хайна." },
+    { id: 5, title: "Хөх толбо", year: 2025, genre: "Инээдмийн", runtime: 92, hue1: 210, hue2: 50, poster_url: P + "khokh-tolbo-v2.jpg", has_video: false, description: "Эгчийнхээ хүүхдийг долоо хоног харахаар болсон ганц бие залуугийн инээдтэй адал явдал." },
+    { id: 6, title: "Чимээгүй хөндий", year: 2025, genre: "Аймшгийн", runtime: 99, hue1: 150, hue2: 200, poster_url: P + "chimeegui-khondii-v2.jpg", has_video: false, description: "Уулын хөндийд амарч буй найзууд хаягдсан гэрээс шөнө бүр гэрэл асахыг анзаарна." }
   ];
 
   // ---------- Тохиргоо ----------
@@ -331,7 +411,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   };
-  const state = { movies: [], q: "", genre: "Бүгд", sort: store.get("kino.sort", "new"), favOnly: false, user: null, favs: new Set(store.get("kino.favs", [])), current: null, phone: "", pendingPlay: null, ents: [], plans: {}, pay: null, payTimer: null };
+  const state = { movies: [], q: "", genre: "Бүгд", sort: store.get("kino.sort", "new"), view: "home", user: null, favs: new Set(store.get("kino.favs", [])), current: null, phone: "", pendingPlay: null, ents: [], plans: {}, pay: null, payTimer: null, hero: 0, heroTimer: null, loaded: false };
 
   function toast(text) {
     const t = document.createElement("div");
@@ -355,24 +435,24 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     return u.protocol === "https:" ? u.href : "";
   }
 
+  const dur = (r) => { r = +r || 0; const h = Math.floor(r / 60), m = r % 60; return h ? `${h} цаг${m ? ` ${m} мин` : ""}` : `${m} мин`; };
   const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.3 5 6.6 5c2 0 3.5 1.1 5.4 3 1.9-1.9 3.4-3 5.4-3C20.7 5 23 8.3 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>';
   function posterHTML(m, withBadges = true, priority = false) {
+    const badge = !withBadges ? "" : !m.has_video ? `<span class="badge soon">Удахгүй</span>` : hasAccess(m.id) ? `<span class="badge open">Нээлттэй</span>` : `<span class="badge">VIP</span>`;
     return `<div class="poster" style="--h1:${+m.hue1 || 0};--h2:${+m.hue2 || 220}">
-      ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="${esc(m.title)} постер" width="600" height="848" ${priority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}
-      ${withBadges && !m.has_video ? `<span class="soon">Удахгүй</span>` : ""}
-      ${withBadges && m.has_video ? `<span class="ready">Үзэх боломжтой</span>` : ""}
-      ${withBadges ? `<div class="hover" aria-hidden="true">${m.has_video ? `<span class="play">▶</span>` : ""}<p>${esc(m.description)}</p></div>` : ""}
+      ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="${esc(m.title)} постер" width="600" height="848" ${priority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}<div class="p-title">${esc(m.title)}</div>
+      ${badge}
       ${withBadges && state.favs.has(m.id) ? `<span class="fav-mark" title="Миний жагсаалтад">${heart}</span>` : ""}
-      <div class="p-title">${esc(m.title)}</div>
-      <div class="p-year">${esc(m.year)} · ${esc(m.runtime)} мин</div>
+      ${withBadges ? `<div class="info">${esc(m.year)} · ${dur(m.runtime)}</div>` : ""}
     </div>`;
   }
+  const cardHTML = (m) => `<button class="card" data-open="${m.id}" aria-label="${esc(m.title)}, ${esc(m.year)}">${posterHTML(m)}<div class="name">${esc(m.title)}</div></button>`;
 
   // ---------- Өгөгдөл ----------
   async function loadMovies() {
     if (sb) {
       const { data, error } = await sb.from("movies").select("*").eq("published", true);
-      if (!error && data?.length) { $("#src").textContent = "Supabase"; return data; }
+      if (!error && data?.length) return data;
       if (error) console.warn("movies хүснэгт:", error.message);
     }
     return SAMPLE;
@@ -401,56 +481,108 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   }
 
   // ---------- Харуулах ----------
+  const norm = (v) => String(v || "").toLowerCase().replace(/ө/g, "о").replace(/ү/g, "у").replace(/ё/g, "е");
+  const byNew = (a, b) => (b.has_video === true) - (a.has_video === true) || b.year - a.year || b.id - a.id;
   function visible() {
-    const norm = (v) => String(v || "").toLowerCase().replace(/ө/g, "о").replace(/ү/g, "у").replace(/ё/g, "е");
     const q = norm(state.q.trim());
-    const by = { new: (a, b) => b.year - a.year || b.id - a.id, title: (a, b) => a.title.localeCompare(b.title, "mn"), runtime: (a, b) => a.runtime - b.runtime }[state.sort] || ((a, b) => b.year - a.year);
-    const byReady = (f) => (a, b) => (b.has_video === true) - (a.has_video === true) || f(a, b);
+    const by = { new: byNew, title: (a, b) => a.title.localeCompare(b.title, "mn"), runtime: (a, b) => a.runtime - b.runtime }[state.sort] || byNew;
     return state.movies.filter((m) =>
       (state.genre === "Бүгд" || m.genre === state.genre) &&
-      (!state.favOnly || state.favs.has(m.id)) &&
+      (state.view !== "favs" || state.favs.has(m.id)) &&
+      (state.view !== "ready" || m.has_video) &&
       (!q || [m.title, m.genre, m.description].some((v) => norm(v).includes(q)))
-    ).sort(state.sort === "new" ? byReady(by) : by);
+    ).sort(by);
   }
-  function renderFeatured() {
-    const top = state.movies.find((m) => m.featured) || [...state.movies].sort((a, b) => b.year - a.year || a.id - b.id)[0];
-    if (!top) return;
-    const rentPrice = top.rent_price || state.plans.rent48?.amount;
-    const subPrice = state.plans.sub30?.amount;
-    $("#featured").innerHTML = `
-      ${top.poster_url ? `<div class="backdrop" style="background-image:url('${esc(top.poster_url)}')"></div>` : ""}
-      ${posterHTML(top, false, true)}
-      <div style="min-width:0">
-        <div class="eyebrow">Онцлох кино · ${esc(top.genre)} · ${esc(top.year)} · ${esc(top.runtime)} мин</div>
-        <h1>${esc(top.title)}</h1>
-        <p>${esc(top.description)}</p>
-        <div class="actions">
-          <button class="btn primary" data-play="${top.id}" ${top.has_video ? "" : "disabled"}>${top.has_video ? "▶ Үзэх" : "Удахгүй"}</button>
-          <button class="btn" data-open="${top.id}">Дэлгэрэнгүй</button>
-          <button class="btn ghost" data-fav="${top.id}">${state.favs.has(top.id) ? "★ Жагсаалтад" : "☆ Жагсаалтад нэмэх"}</button>
+
+  function heroItems() {
+    const list = [...state.movies].filter((m) => m.poster_url).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b));
+    return list.slice(0, 6);
+  }
+  function renderHero() {
+    const items = heroItems();
+    $("#hero").hidden = !items.length;
+    if (!items.length) return;
+    if (state.hero >= items.length) state.hero = 0;
+    $("#slides").innerHTML = items.map((m, i) => `
+      <div class="slide${i === state.hero ? " on" : ""}" data-open="${m.id}" aria-hidden="${i !== state.hero}">
+        <div class="bg" style="background-image:url('${esc(m.poster_url)}')"></div>
+        <img class="art" src="${esc(m.poster_url)}" alt="" ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">
+        <div class="cap">
+          <div style="min-width:0">
+            <h2>${esc(m.title)}</h2>
+            <div class="sub">${esc(m.genre)} · ${esc(m.year)} · ${dur(m.runtime)}</div>
+          </div>
+          <div class="go">
+            ${m.has_video ? `<button class="btn primary" data-play="${m.id}" tabindex="${i === state.hero ? 0 : -1}">▶ Үзэх</button>` : ""}
+            <button class="btn glass" data-open="${m.id}" tabindex="${i === state.hero ? 0 : -1}">Дэлгэрэнгүй</button>
+          </div>
         </div>
-        ${top.has_video && rentPrice ? `<div class="price-line">Түрээс <b>${fmt(rentPrice)}</b> / 48 цаг${subPrice ? ` · эсвэл бүх кино <b>${fmt(subPrice)}</b> / сар` : ""}</div>` : ""}
-      </div>`;
-    if (subPrice) $("#promoPrice").textContent = fmt(subPrice);
-    const hasSub = state.ents.some((e) => e.movie_id == null && new Date(e.expires_at) > new Date());
-    $("#promo").hidden = hasSub;
+      </div>`).join("");
+    $("#dots").innerHTML = items.length > 1 ? items.map((m, i) => `<button data-dot="${i}" aria-label="${i + 1}-р слайд" aria-current="${i === state.hero}"></button>`).join("") : "";
+    $("#hPrev").hidden = $("#hNext").hidden = items.length < 2;
   }
-  function renderGenres() {
+  function showSlide(i) {
+    const n = heroItems().length; if (!n) return;
+    state.hero = (i + n) % n;
+    document.querySelectorAll("#slides .slide").forEach((s, k) => {
+      const on = k === state.hero; s.classList.toggle("on", on); s.setAttribute("aria-hidden", !on);
+      s.querySelectorAll("button").forEach((b) => (b.tabIndex = on ? 0 : -1));
+    });
+    document.querySelectorAll("#dots button").forEach((d, k) => d.setAttribute("aria-current", k === state.hero));
+  }
+  function startHero() {
+    clearInterval(state.heroTimer);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    state.heroTimer = setInterval(() => { if (!document.hidden && state.view === "home") showSlide(state.hero + 1); }, 6000);
+  }
+
+  function rowHTML(title, list, more) {
+    if (!list.length) return "";
+    return `<section class="row">
+      <div class="row-head"><h3>${esc(title)}</h3>${more ? `<button data-more="${esc(more)}">Бүгд ›</button>` : ""}</div>
+      <div class="track-wrap">
+        <button class="arrow l" data-scroll="-1" aria-label="Зүүн">‹</button>
+        <div class="track">${list.map(cardHTML).join("")}</div>
+        <button class="arrow r" data-scroll="1" aria-label="Баруун">›</button>
+      </div>
+    </section>`;
+  }
+  function renderRows() {
+    const all = [...state.movies].sort(byNew);
+    const ready = all.filter((m) => m.has_video);
+    const genres = [...new Set(all.map((m) => m.genre).filter(Boolean))];
+    let html = rowHTML("Шинэ", [...state.movies].sort((a, b) => b.year - a.year || b.id - a.id).slice(0, 18), "browse:Бүгд");
+    html += rowHTML("Үзэх боломжтой", ready, "ready");
+    if (state.user && state.favs.size) html += rowHTML("Миний жагсаалт", all.filter((m) => state.favs.has(m.id)), "favs");
+    const single = []; let genreRows = 0;
+    genres.forEach((g) => { const l = all.filter((m) => m.genre === g); l.length >= 2 ? (genreRows++, html += rowHTML(g, l, "browse:" + g)) : single.push(...l); });
+    if (single.length && genreRows) html += rowHTML("Бусад төрөл", single, "browse:Бүгд");
+    $("#rows").innerHTML = html;
+  }
+  function renderBrowse() {
+    const titles = { browse: "Кинонууд", ready: "Үзэх боломжтой", favs: "Миний жагсаалт" };
+    $("#browseTitle").textContent = state.q.trim() ? `“${state.q.trim()}” хайлт` : titles[state.view] || "Кинонууд";
     const genres = ["Бүгд", ...new Set(state.movies.map((m) => m.genre).filter(Boolean))];
     $("#genres").innerHTML = genres.map((g) => `<button class="chip" data-genre="${esc(g)}" aria-pressed="${g === state.genre}">${esc(g)}</button>`).join("");
+    const list = visible();
+    $("#count").textContent = `${list.length} кино`;
+    $("#grid").innerHTML = list.length ? list.map(cardHTML).join("")
+      : `<div class="empty">${state.view === "favs" ? "Жагсаалт хоосон байна. Кино нээгээд ☆ товчийг дарна уу." : "Тохирох кино олдсонгүй."}</div>`;
   }
   function render() {
-    renderFeatured(); renderGenres();
-    const list = visible();
-    $("#count").textContent = `${list.length} / ${state.movies.length} кино`;
-    $("#grid").innerHTML = list.length
-      ? list.map((m) => `
-        <button class="card" data-open="${m.id}" aria-label="${esc(m.title)}, ${esc(m.year)}">
-          ${posterHTML(m)}
-          <div class="name">${esc(m.title)}</div>
-          <div class="meta"><span>${esc(m.genre)}</span><span class="mono">${esc(m.runtime)} мин</span></div>
-        </button>`).join("")
-      : `<div class="empty">${state.favOnly ? "Жагсаалт хоосон байна. Кино нээгээд ☆ товчийг дарна уу." : "Хайлтад тохирох кино олдсонгүй."}</div>`;
+    const home = state.view === "home" && !state.q.trim();
+    $("#homeView").hidden = !home; $("#browseView").hidden = home;
+    const cur = home ? "home" : state.view;
+    document.querySelectorAll("nav.tabs [data-view]").forEach((b) => b.dataset.view === cur ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
+    if (home) { renderHero(); renderRows(); } else renderBrowse();
+    renderVip();
+  }
+  function setView(v, genre) {
+    state.view = v; if (genre) state.genre = genre; else if (v !== "browse") state.genre = "Бүгд";
+    if (v === "home") { state.q = ""; $("#q").value = ""; }
+    if (v === "favs" && sb && !state.user) { openAuth("Жагсаалтаа харахын тулд нэвтэрнэ үү."); return; }
+    $("#menu").hidden = true;
+    render(); scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function openMovie(id, play = false, videoUrl = "") {
@@ -462,16 +594,13 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const playerHTML = play && src
       ? `<div class="player"><iframe src="${esc(src)}" title="${esc(m.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe></div>`
       : "";
+    const rentPrice = m.rent_price || state.plans.rent48?.amount;
     $("#movieBody").innerHTML = `${playerHTML}
       <div class="d-body">
         ${posterHTML(m, false)}
         <div style="min-width:0">
           <h2 id="dTitle">${esc(m.title)}</h2>
-          <dl class="facts">
-            <dt>Он</dt><dd>${esc(m.year)}</dd>
-            <dt>Төрөл</dt><dd>${esc(m.genre)}</dd>
-            <dt>Үргэлжлэх</dt><dd>${esc(m.runtime)} мин (${Math.floor(m.runtime / 60)} ц ${m.runtime % 60} мин)</dd>
-          </dl>
+          <div class="facts"><span>${esc(m.year)}</span><span>${esc(m.genre)}</span><span>${dur(m.runtime)}</span>${m.has_video && !hasAccess(m.id) && rentPrice ? `<span>Түрээс ${fmt(rentPrice)} / 48 цаг</span>` : ""}</div>
           <p>${esc(m.description)}</p>
           <div class="actions">
             ${playerHTML ? "" : `<button class="btn primary" data-play="${m.id}" ${m.has_video ? "" : "disabled"}>${m.has_video ? (hasAccess(m.id) ? "▶ Үзэх" : "▶ Үзэх · эрх авах") : "Видео удахгүй нэмэгдэнэ"}</button>`}
@@ -654,45 +783,106 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   });
   $("#changePhone").addEventListener("click", () => { $("#phoneForm").hidden = false; $("#codeForm").hidden = true; authMsg(""); });
 
+
+  // ---------- Толгойн товчнууд ----------
+  const hasSub = () => state.ents.some((e) => e.movie_id == null && new Date(e.expires_at) > new Date());
+  function renderVip() {
+    const s = hasSub();
+    $("#vipBtn").classList.toggle("has", s);
+    $("#vipLbl").innerHTML = s ? "Эрхтэй" : '<span class="lbl-long">Эрх авах</span><span class="lbl-short">VIP</span>';
+    const u = state.user, ub = $("#userBtn");
+    ub.classList.toggle("on", !!u);
+    ub.setAttribute("aria-label", u ? "Миний бүртгэл" : "Нэвтрэх");
+    const label = u ? (u.email || (u.phone ? "+" + u.phone : "")) : "";
+    ub.innerHTML = u ? esc((u.user_metadata?.full_name || label || "?").trim().charAt(0).toUpperCase())
+      : '<svg viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+    $("#who").textContent = label;
+  }
+
+  // Анх орсон, эрхгүй хэрэглэгчид 3 хоногт нэг удаа санал үзүүлнэ
+  function maybePromo() {
+    if (!sb || hasSub()) return;
+    const last = store.get("kino.promoAt", 0);
+    if (Date.now() - last < 3 * 864e5) return;
+    if (document.querySelector("dialog[open]")) return;
+    const sub = state.plans.sub30; if (!sub) return;
+    const rent = state.plans.rent48;
+    const pics = state.movies.filter((m) => m.poster_url).slice(0, 3);
+    $("#promoArt").innerHTML = `<div class="reel">${pics.map((m) => `<img src="${esc(m.poster_url)}" alt="">`).join("") || "<i></i><i></i><i></i>"}</div>`;
+    $("#promoList").innerHTML = `<div><span>${esc(sub.title || "30 хоногийн эрх")} · бүх кино</span><b>${fmt(sub.amount)}</b></div>`
+      + (rent ? `<div><span>Нэг кино · ${rent.hours} цаг</span><b>${fmt(rent.amount)}-с</b></div>` : "");
+    store.set("kino.promoAt", Date.now());
+    $("#promoDlg").showModal();
+  }
+
   async function onUser(user) {
     state.user = user;
-    $("#loginBtn").hidden = !!user; $("#logoutBtn").hidden = !user; $("#who").hidden = !user;
-    $("#who").textContent = user ? (user.email || user.phone ? (user.email || "+" + user.phone) : "") : "";
     await Promise.all([loadFavs(), loadAccess()]); render();
     if (user && state.pendingPlay) { const id = state.pendingPlay; state.pendingPlay = null; play(id); }
   }
 
   // ---------- Үйлдлүүд ----------
   document.addEventListener("click", (e) => {
+    const menu = $("#menu");
+    if (!menu.hidden && !e.target.closest("#menu, #userBtn")) menu.hidden = true;
     const b = e.target.closest("[data-buy]"); if (b) { if (!b.disabled) buy(b.dataset.buy, +b.dataset.movie); return; }
     const p = e.target.closest("[data-play]"); if (p) { if (!p.disabled) play(+p.dataset.play); return; }
     const o = e.target.closest("[data-open]"); if (o) { openMovie(+o.dataset.open); return; }
     const f = e.target.closest("[data-fav]"); if (f) { toggleFav(+f.dataset.fav); return; }
     const g = e.target.closest("[data-genre]"); if (g) { state.genre = g.dataset.genre; render(); return; }
+    const v = e.target.closest("[data-view]"); if (v) { setView(v.dataset.view); return; }
+    const mo = e.target.closest("[data-more]"); if (mo) { const [vw, gn] = mo.dataset.more.split(":"); setView(vw, gn); return; }
+    const d = e.target.closest("[data-dot]"); if (d) { showSlide(+d.dataset.dot); startHero(); return; }
+    const sc = e.target.closest("[data-scroll]"); if (sc) { const t = sc.parentElement.querySelector(".track"); t.scrollBy({ left: +sc.dataset.scroll * t.clientWidth * 0.85, behavior: "smooth" }); return; }
     const c = e.target.closest("[data-close]"); if (c) c.closest("dialog").close();
   });
-  $("#loginBtn").addEventListener("click", () => openAuth());
-  $("#promoBtn").addEventListener("click", openSubPaywall);
+  $("#hPrev").addEventListener("click", (e) => { e.stopPropagation(); showSlide(state.hero - 1); startHero(); });
+  $("#hNext").addEventListener("click", (e) => { e.stopPropagation(); showSlide(state.hero + 1); startHero(); });
+  // Гар утсан дээр слайдыг шудрах
+  (() => {
+    let x0 = null, moved = false;
+    const h = $("#hero");
+    h.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; moved = false; }, { passive: true });
+    h.addEventListener("touchmove", (e) => { if (x0 != null && Math.abs(e.touches[0].clientX - x0) > 10) moved = true; }, { passive: true });
+    h.addEventListener("touchend", (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) { showSlide(state.hero + (dx < 0 ? 1 : -1)); startHero(); } });
+    h.addEventListener("click", (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  })();
+
+  $("#userBtn").addEventListener("click", () => {
+    if (!state.user) { openAuth(); return; }
+    $("#menu").hidden = !$("#menu").hidden;
+  });
+  const openPlans = () => { $("#menu").hidden = true; openSubPaywall(); };
+  $("#vipBtn").addEventListener("click", openPlans);
+  $("#plansTab").addEventListener("click", openPlans);
+  $("#menuPlans").addEventListener("click", openPlans);
+  $("#promoBuy").addEventListener("click", () => { $("#promoDlg").close(); openSubPaywall(); });
+  $("#logoutBtn").addEventListener("click", async () => { $("#menu").hidden = true; await sb?.auth.signOut(); toast("Гарлаа"); });
   $("#yr").textContent = new Date().getFullYear();
-  $("#logoutBtn").addEventListener("click", async () => { await sb?.auth.signOut(); toast("Гарлаа"); });
-  document.addEventListener("keydown", (e) => { if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName) && !document.querySelector("dialog[open]")) { e.preventDefault(); $("#q").focus(); } });
-  $("#q").addEventListener("input", (e) => { state.q = e.target.value; render(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") $("#menu").hidden = true;
+    if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName) && !document.querySelector("dialog[open]")) { e.preventDefault(); $("#q").focus(); }
+  });
+  $("#q").addEventListener("input", (e) => {
+    state.q = e.target.value;
+    if (state.q.trim() && state.view === "home") { state.view = "browse"; state.genre = "Бүгд"; }
+    if (!state.q.trim() && state.view === "browse" && state.genre === "Бүгд") state.view = "home";
+    render();
+  });
   $("#sort").value = state.sort;
   $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; store.set("kino.sort", state.sort); render(); });
-  $("#favOnly").addEventListener("click", (e) => { state.favOnly = !state.favOnly; e.currentTarget.setAttribute("aria-pressed", state.favOnly); render(); });
-  // Видео хаахад тоглуулагчийг зогсооно
   $("#payDlg").addEventListener("close", () => { stopPolling(); state.pay = null; });
   $("#movieDlg").addEventListener("close", () => { state.current = null; $("#movieBody").innerHTML = ""; });
 
   // ---------- Эхлүүлэх ----------
   (async () => {
-    state.movies = SAMPLE; render();
+    state.movies = SAMPLE; render(); startHero();
     if (!sb) return;
-    $("#mode").textContent = "Шууд"; $("#mode").classList.add("live");
     [state.movies] = await Promise.all([loadMovies(), loadPlans()]);
     const { data } = await sb.auth.getSession();
     await onUser(data.session?.user || null);
     sb.auth.onAuthStateChange((_e, session) => { if ((session?.user?.id || null) !== (state.user?.id || null)) onUser(session?.user || null); });
+    setTimeout(maybePromo, 1500);
   })();
 })();
 </script>
