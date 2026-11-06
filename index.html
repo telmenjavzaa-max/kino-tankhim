@@ -264,6 +264,15 @@ footer .wrap { padding-block: 22px; }
     if (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase) sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
   } catch (e) { console.warn("Supabase эхлүүлж чадсангүй:", e); }
 
+  // ---------- Meta Pixel ----------
+  const PIXEL = String(cfg.META_PIXEL_ID || "").trim();
+  if (/^\d{10,20}$/.test(PIXEL)) {
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', PIXEL);
+    fbq('track', 'PageView');
+  }
+  const track = (ev, data, opts) => { try { if (window.fbq && PIXEL) fbq('track', ev, data || {}, opts || {}); } catch {} };
+
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const store = {
@@ -384,6 +393,7 @@ footer .wrap { padding-block: 22px; }
   function openMovie(id, play = false, videoUrl = "") {
     const m = state.movies.find((x) => x.id === id);
     if (!m) return;
+    if (!play) track("ViewContent", { content_ids: [String(m.id)], content_name: m.title, content_type: "product", content_category: m.genre || "" });
     state.current = m;
     const src = embedUrl(videoUrl);
     const playerHTML = play && src
@@ -463,6 +473,11 @@ footer .wrap { padding-block: 22px; }
   }
 
   async function buy(plan, movieId) {
+    {
+      const mv = state.movies.find((x) => x.id === movieId);
+      const amt = plan === "rent48" ? (mv?.rent_price || state.plans.rent48?.amount) : state.plans.sub30?.amount;
+      track("InitiateCheckout", { content_ids: [plan === "rent48" ? String(movieId) : "sub30"], content_name: plan === "rent48" ? mv?.title : "30 хоногийн эрх", value: Number(amt) || 0, currency: "MNT", num_items: 1 });
+    }
     const msg = $("#payMsg");
     msg.className = "msg"; msg.textContent = "Нэхэмжлэх үүсгэж байна…";
     document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = true));
@@ -485,7 +500,7 @@ footer .wrap { padding-block: 22px; }
       ${data.urls?.length ? `<div class="banks">${data.urls.map((u) => `<a href="${esc(u.link)}"><img src="${esc(u.logo)}" alt="" loading="lazy">${esc(u.name)}</a>`).join("")}</div>` : ""}
       <div class="pay-status"><span class="dot"></span><span id="payState">Төлбөр хүлээж байна…</span></div>
       <button class="btn primary wide" id="checkPay">Төлсөн — шалгах</button>`;
-    state.pay = { id: data.payment_id, movieId, until: Date.now() + 10 * 60 * 1000 };
+    state.pay = { id: data.payment_id, movieId, plan, amount: data.amount, until: Date.now() + 10 * 60 * 1000 };
     $("#checkPay").addEventListener("click", () => checkPay(true));
     state.payTimer = setInterval(() => checkPay(false), 3000);
   }
@@ -513,6 +528,7 @@ footer .wrap { padding-block: 22px; }
       stopPolling();
       $("#payDlg").close();
       toast("Төлбөр амжилттай. Сайхан үзээрэй!");
+      track("Purchase", { value: Number(p.amount) || 0, currency: "MNT", content_ids: [p.plan === "rent48" ? String(p.movieId) : "sub30"], content_type: "product" }, { eventID: p.id });
       await loadAccess();
       play(p.movieId);
     }
@@ -555,7 +571,7 @@ footer .wrap { padding-block: 22px; }
     authMsg("Шалгаж байна…");
     const { error } = await sb.auth.verifyOtp({ phone: state.phone, token, type: "sms" });
     if (error) { authMsg("Код буруу эсвэл хугацаа нь дууссан байна.", "err"); return; }
-    $("#authDlg").close(); toast("Нэвтэрлээ");
+    $("#authDlg").close(); toast("Нэвтэрлээ"); track("CompleteRegistration", { method: "phone" });
   });
   $("#changePhone").addEventListener("click", () => { $("#phoneForm").hidden = false; $("#codeForm").hidden = true; authMsg(""); });
 
