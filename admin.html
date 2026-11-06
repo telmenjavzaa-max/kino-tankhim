@@ -399,7 +399,7 @@ dialog::backdrop { background: #000c; }
 
   // ---------- Багц / үнэ ----------
   async function loadPlans() {
-    const { data } = await sb.from("plans").select("*").order("kind").order("sort").order("amount");
+    const { data } = await sb.from("plans").select("*").order("kind", { ascending: false }).order("sort").order("amount");
     state.plans = data || [];
     $("#planCards").innerHTML = state.plans.map(planForm).join("");
     renderMovies();
