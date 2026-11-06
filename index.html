@@ -67,8 +67,21 @@ header.top .wrap { display: flex; align-items: center; gap: 14px; padding-block:
 .btn.wide { width: 100%; }
 .btn[disabled] { opacity: .55; cursor: default; }
 
-.marquee { margin-block: 28px 8px; display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 28px; align-items: center; padding: 22px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(120deg, var(--surface), var(--bg)); position: relative; overflow: hidden; }
-.marquee::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(circle, var(--brass) 1.6px, transparent 2.2px); background-size: 22px 22px; background-position: 11px 11px; opacity: .14; mask: linear-gradient(90deg, transparent 40%, #000); }
+/* Hero: бүдэг постер арын дэвсгэр + театрын гэрлийн цэгүүд */
+.marquee { margin-block: 24px 8px; display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 36px; align-items: center; padding: 32px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); position: relative; overflow: hidden; isolation: isolate; min-height: 380px; }
+.marquee .backdrop { position: absolute; inset: -40px; z-index: -2; background-size: cover; background-position: center; filter: blur(38px) saturate(1.25) brightness(.55); transform: scale(1.1); }
+.marquee::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 30%, transparent) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 55%, var(--bg) 100%); }
+.marquee::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 10px; pointer-events: none; background-image: radial-gradient(circle, var(--brass) 2px, transparent 2.6px); background-size: 22px 10px; opacity: .55; }
+.marquee .poster { box-shadow: 0 30px 60px -20px #000c, 0 0 0 1px #ffffff14; }
+.price-line { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 14px; letter-spacing: .04em; }
+.price-line b { color: var(--brass); font-weight: 500; }
+
+/* Сарын эрхийн зурвас */
+.promo { margin-block: 18px 6px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 16px 20px; border-radius: 14px; border: 1px dashed color-mix(in srgb, var(--brass) 55%, var(--line)); background: linear-gradient(90deg, color-mix(in srgb, var(--brass) 12%, var(--surface)), var(--surface)); }
+.promo .ticket { font-family: var(--display); font-weight: 700; font-size: 18px; line-height: 1.2; }
+.promo .ticket span { color: var(--brass); }
+.promo .sub { color: var(--muted); font-size: 13px; }
+.promo .grow { flex: 1 1 260px; min-width: 0; }
 .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
 .marquee h1 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4.4vw, 46px); line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
 .marquee p { color: var(--muted); max-width: 60ch; margin: 0 0 16px; }
@@ -86,7 +99,13 @@ select { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); 
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 18px; margin-bottom: 60px; }
 .card { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.card:hover .poster { transform: translateY(-4px); box-shadow: 0 14px 30px -12px #000; }
+.card:hover .poster, .card:focus-visible .poster { transform: translateY(-4px); box-shadow: 0 18px 34px -14px #000; }
+.poster .hover { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 14px; background: linear-gradient(180deg, transparent 30%, #000d 100%); opacity: 0; transition: opacity .2s ease; }
+.poster .hover .play { align-self: center; margin-bottom: auto; margin-top: auto; width: 54px; height: 54px; border-radius: 50%; background: var(--brass); color: var(--brass-ink); display: grid; place-items: center; font-size: 20px; box-shadow: 0 8px 24px -6px #000; }
+.poster .hover p { margin: 0; font-size: 12px; line-height: 1.4; color: #fff; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card:hover .poster .hover, .card:focus-visible .poster .hover { opacity: 1; }
+@media (hover: none) { .poster .hover { display: none; } }
+.poster .ready { position: absolute; left: 10px; top: 10px; z-index: 2; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: var(--brass); color: var(--brass-ink); padding: 3px 7px; border-radius: 4px; font-weight: 500; }
 .card .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
 .card .name { font-weight: 700; font-size: 15px; line-height: 1.3; color: var(--fg); }
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
@@ -147,11 +166,18 @@ dialog::backdrop { background: #000c; }
 .msg.ok { color: var(--ok); }
 
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 50; }
-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
-footer .wrap { padding-block: 22px; }
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; margin-top: 20px; }
+footer .wrap { padding-block: 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px 32px; }
+footer h4 { margin: 0 0 8px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--fg); }
+footer p { margin: 0 0 4px; }
+footer a { color: var(--muted); }
+footer a:hover { color: var(--brass); }
+footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 16px; font-size: 12px; }
 
 @media (max-width: 640px) {
-  .marquee { grid-template-columns: minmax(0, 120px) minmax(0, 1fr); gap: 16px; padding: 16px; }
+  .marquee { grid-template-columns: minmax(0, 120px) minmax(0, 1fr); gap: 16px; padding: 20px 16px 16px; min-height: 0; }
+  .marquee::after { background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 40%, transparent), var(--bg)); }
+  .promo .ticket { font-size: 16px; }
   .marquee p { display: none; }
   .d-body { grid-template-columns: 1fr; }
   .d-body .poster { max-width: 180px; }
@@ -167,7 +193,7 @@ footer .wrap { padding-block: 22px; }
   <div class="wrap">
     <div class="brand"><span class="bulbs"><i></i><i></i><i></i></span>Кино Танхим</div>
     <span class="spacer"></span>
-    <span class="pill" id="mode">Демо горим</span>
+    <span class="pill" id="mode" hidden>Демо горим</span>
     <span class="access" id="access" hidden></span>
     <span class="who" id="who" hidden></span>
     <button class="btn primary" id="loginBtn">Нэвтрэх</button>
@@ -177,6 +203,14 @@ footer .wrap { padding-block: 22px; }
 
 <main class="wrap">
   <section class="marquee" id="featured" aria-label="Онцлох кино"></section>
+
+  <section class="promo" id="promo" aria-label="Сарын эрх">
+    <div class="grow">
+      <div class="ticket">Бүх кино · 30 хоног · <span id="promoPrice">9,900₮</span></div>
+      <div class="sub">QPay-ээр 1 минутад. Хаан, Голомт, ХАС, Төрийн банк болон бүх банкны апп.</div>
+    </div>
+    <button class="btn primary" id="promoBtn">Эрх авах</button>
+  </section>
 
   <div class="controls">
     <label class="search">
@@ -195,7 +229,25 @@ footer .wrap { padding-block: 22px; }
   <div class="grid" id="grid"></div>
 </main>
 
-<footer><div class="wrap">Кино Танхим · Өгөгдөл: <span id="src">туршилтын жишээ</span></div></footer>
+<footer>
+  <div class="wrap">
+    <div>
+      <h4>Кино Танхим</h4>
+      <p>Монгол кино онлайнаар — хаанаас ч, хэзээ ч.</p>
+    </div>
+    <div>
+      <h4>Төлбөр</h4>
+      <p>QPay — бүх банкны апп</p>
+      <p>Сарын эрх эсвэл кино тус бүрээр</p>
+    </div>
+    <div>
+      <h4>Холбоо барих</h4>
+      <p>Facebook пэйж: <b>Kino tanhim</b></p>
+      <p>Мессежээр холбогдоно уу</p>
+    </div>
+    <div class="fine">© <span id="yr">2026</span> Кино Танхим · <a href="privacy.html">Нууцлалын бодлого</a><span id="src" hidden>туршилтын жишээ</span></div>
+  </div>
+</footer>
 
 <dialog id="movieDlg" aria-labelledby="dTitle">
   <button class="close-x" data-close aria-label="Хаах">×</button>
@@ -308,6 +360,8 @@ footer .wrap { padding-block: 22px; }
     return `<div class="poster" style="--h1:${+m.hue1 || 0};--h2:${+m.hue2 || 220}">
       ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="${esc(m.title)} постер" width="600" height="848" ${priority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}
       ${withBadges && !m.has_video ? `<span class="soon">Удахгүй</span>` : ""}
+      ${withBadges && m.has_video ? `<span class="ready">Үзэх боломжтой</span>` : ""}
+      ${withBadges ? `<div class="hover" aria-hidden="true">${m.has_video ? `<span class="play">▶</span>` : ""}<p>${esc(m.description)}</p></div>` : ""}
       ${withBadges && state.favs.has(m.id) ? `<span class="fav-mark" title="Миний жагсаалтад">${heart}</span>` : ""}
       <div class="p-title">${esc(m.title)}</div>
       <div class="p-year">${esc(m.year)} · ${esc(m.runtime)} мин</div>
@@ -351,26 +405,35 @@ footer .wrap { padding-block: 22px; }
     const norm = (v) => String(v || "").toLowerCase().replace(/ө/g, "о").replace(/ү/g, "у").replace(/ё/g, "е");
     const q = norm(state.q.trim());
     const by = { new: (a, b) => b.year - a.year || b.id - a.id, title: (a, b) => a.title.localeCompare(b.title, "mn"), runtime: (a, b) => a.runtime - b.runtime }[state.sort] || ((a, b) => b.year - a.year);
+    const byReady = (f) => (a, b) => (b.has_video === true) - (a.has_video === true) || f(a, b);
     return state.movies.filter((m) =>
       (state.genre === "Бүгд" || m.genre === state.genre) &&
       (!state.favOnly || state.favs.has(m.id)) &&
       (!q || [m.title, m.genre, m.description].some((v) => norm(v).includes(q)))
-    ).sort(by);
+    ).sort(state.sort === "new" ? byReady(by) : by);
   }
   function renderFeatured() {
     const top = state.movies.find((m) => m.featured) || [...state.movies].sort((a, b) => b.year - a.year || a.id - b.id)[0];
     if (!top) return;
+    const rentPrice = top.rent_price || state.plans.rent48?.amount;
+    const subPrice = state.plans.sub30?.amount;
     $("#featured").innerHTML = `
+      ${top.poster_url ? `<div class="backdrop" style="background-image:url('${esc(top.poster_url)}')"></div>` : ""}
       ${posterHTML(top, false, true)}
-      <div>
-        <div class="eyebrow">Онцлох кино · ${esc(top.genre)} · ${esc(top.year)}</div>
+      <div style="min-width:0">
+        <div class="eyebrow">Онцлох кино · ${esc(top.genre)} · ${esc(top.year)} · ${esc(top.runtime)} мин</div>
         <h1>${esc(top.title)}</h1>
         <p>${esc(top.description)}</p>
         <div class="actions">
-          <button class="btn primary" data-play="${top.id}">▶ Үзэх</button>
+          <button class="btn primary" data-play="${top.id}" ${top.has_video ? "" : "disabled"}>${top.has_video ? "▶ Үзэх" : "Удахгүй"}</button>
           <button class="btn" data-open="${top.id}">Дэлгэрэнгүй</button>
+          <button class="btn ghost" data-fav="${top.id}">${state.favs.has(top.id) ? "★ Жагсаалтад" : "☆ Жагсаалтад нэмэх"}</button>
         </div>
+        ${top.has_video && rentPrice ? `<div class="price-line">Түрээс <b>${fmt(rentPrice)}</b> / 48 цаг${subPrice ? ` · эсвэл бүх кино <b>${fmt(subPrice)}</b> / сар` : ""}</div>` : ""}
       </div>`;
+    if (subPrice) $("#promoPrice").textContent = fmt(subPrice);
+    const hasSub = state.ents.some((e) => e.movie_id == null && new Date(e.expires_at) > new Date());
+    $("#promo").hidden = hasSub;
   }
   function renderGenres() {
     const genres = ["Бүгд", ...new Set(state.movies.map((m) => m.genre).filter(Boolean))];
@@ -469,6 +532,22 @@ footer .wrap { padding-block: 22px; }
       </button>
       <div class="msg" id="payMsg" role="status"></div>`;
     if ($("#movieDlg").open) $("#movieDlg").close();
+    if (!$("#payDlg").open) $("#payDlg").showModal();
+  }
+
+  function openSubPaywall() {
+    if (!sb) return;
+    if (!state.user) { openAuth("Эрх авахын тулд эхлээд нэвтэрнэ үү."); return; }
+    stopPolling();
+    const sub = state.plans.sub30 || { amount: 9900, hours: 720, title: "30 хоногийн эрх" };
+    $("#payBody").innerHTML = `
+      <h2 id="pTitle">Бүх кино — ${Math.round(sub.hours / 24)} хоног</h2>
+      <p class="note">Сайт дээрх бүх киног хязгааргүй үзнэ. QPay-ээр төлөөд шууд идэвхжинэ.</p>
+      <button class="plan best" data-buy="sub30" data-movie="">
+        <b>${esc(sub.title)}</b><span class="price">${fmt(sub.amount)}</span>
+        <small>Бүх кино · ${Math.round(sub.hours / 24)} хоног</small>
+      </button>
+      <div class="msg" id="payMsg" role="status"></div>`;
     if (!$("#payDlg").open) $("#payDlg").showModal();
   }
 
@@ -593,6 +672,8 @@ footer .wrap { padding-block: 22px; }
     const c = e.target.closest("[data-close]"); if (c) c.closest("dialog").close();
   });
   $("#loginBtn").addEventListener("click", () => openAuth());
+  $("#promoBtn").addEventListener("click", openSubPaywall);
+  $("#yr").textContent = new Date().getFullYear();
   $("#logoutBtn").addEventListener("click", async () => { await sb?.auth.signOut(); toast("Гарлаа"); });
   document.addEventListener("keydown", (e) => { if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName) && !document.querySelector("dialog[open]")) { e.preventDefault(); $("#q").focus(); } });
   $("#q").addEventListener("input", (e) => { state.q = e.target.value; render(); });
