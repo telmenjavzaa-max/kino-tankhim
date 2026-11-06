@@ -131,7 +131,7 @@ dialog::backdrop { background: #000c; }
   <div id="app" hidden>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="movies" aria-selected="true">Кинонууд</button>
-      <button class="tab" role="tab" data-tab="plans" aria-selected="false">Үнэ</button>
+      <button class="tab" role="tab" data-tab="plans" aria-selected="false">Багц</button>
       <button class="tab" role="tab" data-tab="payments" aria-selected="false">Төлбөр</button>
     </nav>
 
@@ -147,6 +147,8 @@ dialog::backdrop { background: #000c; }
     </section>
 
     <section id="tab-plans" hidden>
+      <div class="actions" style="margin-bottom:14px"><button class="btn primary" id="addPlan">+ Шинэ багц нэмэх</button></div>
+      <p class="hint" style="margin:0 0 14px">Багц = бүх киног тодорхой хугацаанд үзэх эрх. "Нэг кино түрээс" нь кино тус бүрийн түрээсийн суурь үнэ. Хуучин үнэ бөглөвөл сайт дээр зурсан үнээр харагдана.</p>
       <div class="plans" id="planCards"></div>
     </section>
 
@@ -278,7 +280,7 @@ dialog::backdrop { background: #000c; }
   }
   function renderMovies() {
     const q = $("#mq").value.trim().toLowerCase();
-    const rentDefault = state.plans.find((p) => p.code === "rent48")?.amount;
+    const rentDefault = state.plans.find((p) => p.kind === "rent")?.amount;
     const list = state.movies.filter((m) => !q || (m.title || "").toLowerCase().includes(q));
     $("#movieRows").innerHTML = list.length ? list.map((m) => `
       <tr>
@@ -395,33 +397,78 @@ dialog::backdrop { background: #000c; }
     $("#editDlg").close(); toast("Устгагдлаа"); loadMovies();
   });
 
-  // ---------- Үнэ ----------
+  // ---------- Багц / үнэ ----------
   async function loadPlans() {
-    const { data } = await sb.from("plans").select("*").order("amount", { ascending: false });
+    const { data } = await sb.from("plans").select("*").order("kind").order("sort").order("amount");
     state.plans = data || [];
-    $("#planCards").innerHTML = state.plans.map((p) => `
-      <form class="plan-card" data-plan="${esc(p.code)}">
-        <h3>${p.code === "sub30" ? "Сарын эрх (бүх кино)" : "Нэг кино түрээслэх"}</h3>
-        <label class="f">Нэр (төлбөрийн цонхонд харагдана)<input name="title" value="${esc(p.title)}" maxlength="60" required></label>
-        <div class="row">
-          <label class="f">Үнэ (₮)<input name="amount" type="number" min="1" step="1" value="${p.amount}" required></label>
-          <label class="f">Хугацаа (цаг)<input name="hours" type="number" min="1" step="1" value="${p.hours}" required></label>
-        </div>
-        <span class="hint">${p.code === "sub30" ? "720 цаг = 30 хоног" : "Кино тус бүр дээр өөр үнэ тавьж болно"}</span>
-        <label class="check"><input type="checkbox" name="active" ${p.active ? "checked" : ""}> Идэвхтэй</label>
-        <div class="actions"><button class="btn primary">Хадгалах</button></div>
-      </form>`).join("");
+    $("#planCards").innerHTML = state.plans.map(planForm).join("");
     renderMovies();
   }
+  function planForm(p) {
+    const isNew = !p.code, rent = p.kind === "rent";
+    return `<form class="plan-card" data-plan="${esc(p.code || "")}" ${p.active === false ? 'style="opacity:.6"' : ""}>
+      <h3>${rent ? "Нэг кино түрээс (суурь үнэ)" : isNew ? "Шинэ багц" : esc(p.title)}</h3>
+      <label class="f">Нэр<input name="title" value="${esc(p.title || "")}" maxlength="60" required placeholder="30 хоногийн багц"></label>
+      <div class="row">
+        <label class="f">Үнэ (₮)<input name="amount" type="number" min="1" step="1" value="${p.amount ?? ""}" required></label>
+        <label class="f">Хуучин үнэ (зурсан, заавал биш)<input name="old_amount" type="number" min="1" step="1" value="${p.old_amount ?? ""}"></label>
+      </div>
+      <div class="row">
+        ${rent
+          ? `<label class="f">Хугацаа (цаг)<input name="hours" type="number" min="1" step="1" value="${p.hours ?? 48}" required></label>`
+          : `<label class="f">Хугацаа (хоног)<input name="days" type="number" min="1" step="1" value="${p.hours ? Math.round(p.hours / 24) : 30}" required></label>`}
+        <label class="f">Эрэмбэ<input name="sort" type="number" step="1" value="${p.sort ?? 0}"></label>
+      </div>
+      ${rent ? `<span class="hint">Кино тус бүр дээр өөр түрээсийн үнэ тавьж болно (Кинонууд таб).</span>` : `
+      <label class="f">Шошго (заавал биш)<input name="badge" value="${esc(p.badge || "")}" maxlength="30" placeholder="Нээлтийн урамшуулал"></label>
+      <label class="f">Тайлбар<textarea name="description" maxlength="200" placeholder="Бүх киног 30 хоног үзнэ">${esc(p.description || "")}</textarea></label>`}
+      <div class="actions" style="justify-content:space-between;align-items:center">
+        <label class="check"><input type="checkbox" name="active" ${p.active !== false ? "checked" : ""}> Идэвхтэй</label>
+        <span style="display:flex;gap:8px">
+          ${!isNew && !rent ? `<button type="button" class="btn danger" data-del-plan="${esc(p.code)}">Устгах</button>` : ""}
+          ${isNew ? `<button type="button" class="btn" data-cancel-plan>Болих</button>` : ""}
+          <button class="btn primary">Хадгалах</button>
+        </span>
+      </div>
+    </form>`;
+  }
+  $("#addPlan").addEventListener("click", () => {
+    if (document.querySelector('#planCards form[data-plan=""]')) return;
+    $("#planCards").insertAdjacentHTML("afterbegin", planForm({ kind: "sub", active: true, sort: state.plans.filter((p) => p.kind !== "rent").length + 1 }));
+    $('#planCards form[data-plan=""] input[name=title]').focus();
+  });
+  document.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-cancel-plan]")) { e.target.closest("form").remove(); return; }
+    const d = e.target.closest("[data-del-plan]"); if (!d) return;
+    if (!confirm("Энэ багцыг устгах уу?")) return;
+    const { error } = await sb.from("plans").delete().eq("code", d.dataset.delPlan);
+    if (error) { toast(/foreign key|violates/i.test(error.message) ? "Энэ багцаар төлбөр хийгдсэн тул устгах боломжгүй. \"Идэвхтэй\"-г унтраагаад хадгална уу." : "Устгаж чадсангүй: " + error.message); return; }
+    toast("Багц устгагдлаа"); loadPlans();
+  });
   document.addEventListener("submit", async (e) => {
     const f = e.target.closest("[data-plan]"); if (!f) return;
     e.preventDefault();
     const fd = new FormData(f);
-    const upd = { title: fd.get("title").trim(), amount: +fd.get("amount"), hours: +fd.get("hours"), active: !!fd.get("active") };
-    if (!upd.title || upd.amount < 1 || upd.hours < 1) { toast("Бүх талбарыг зөв бөглөнө үү"); return; }
-    const { error } = await sb.from("plans").update(upd).eq("code", f.dataset.plan);
+    const code = f.dataset.plan;
+    const cur = state.plans.find((p) => p.code === code);
+    const rent = cur?.kind === "rent";
+    const num = (k) => { const v = String(fd.get(k) ?? "").trim(); return v === "" ? null : Math.round(+v); };
+    const upd = {
+      title: String(fd.get("title") || "").trim(),
+      amount: num("amount"),
+      old_amount: num("old_amount"),
+      hours: rent ? num("hours") : (num("days") || 0) * 24,
+      sort: num("sort") ?? 0,
+      active: !!fd.get("active"),
+    };
+    if (!rent) { upd.badge = String(fd.get("badge") || "").trim() || null; upd.description = String(fd.get("description") || "").trim() || null; }
+    if (!upd.title || !(upd.amount > 0) || !(upd.hours > 0)) { toast("Нэр, үнэ, хугацааг зөв бөглөнө үү"); return; }
+    if (upd.old_amount != null && upd.old_amount <= upd.amount) { toast("Хуучин үнэ одоогийн үнээс их байх ёстой (эсвэл хоосон орхино)"); return; }
+    let error;
+    if (code) ({ error } = await sb.from("plans").update(upd).eq("code", code));
+    else ({ error } = await sb.from("plans").insert({ ...upd, kind: "sub", code: "sub" + Math.round(upd.hours / 24) + "_" + Date.now().toString(36).slice(-4) }));
     if (error) { toast("Хадгалж чадсангүй: " + error.message); return; }
-    toast("Үнэ шинэчлэгдлээ"); loadPlans();
+    toast("Хадгалагдлаа"); loadPlans();
   });
 
   // ---------- Төлбөр ----------
@@ -443,7 +490,7 @@ dialog::backdrop { background: #000c; }
       <tr>
         <td class="num">${dt(r.paid_at || r.created_at)}</td>
         <td>${esc(r.user_label)}</td>
-        <td>${r.plan_code === "sub30" ? "Сарын эрх" : "Түрээс"}</td>
+        <td>${r.movie_title ? "Түрээс" : "Багц"}</td>
         <td>${esc(r.movie_title || "—")}</td>
         <td class="num">${fmt(r.amount)}</td>
         <td>${r.status === "paid" ? '<span class="pill ok">төлсөн</span>' : r.status === "pending" ? '<span class="pill warn">хүлээгдэж буй</span>' : '<span class="pill off">амжилтгүй</span>'}</td>

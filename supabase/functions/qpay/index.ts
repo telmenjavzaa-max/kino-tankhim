@@ -1,5 +1,5 @@
 // Кино Танхим — QPay төлбөрийн функц
-// POST {action:"create", plan:"sub30"|"rent48", movie_id?}  → нэхэмжлэх + QR
+// POST {action:"create", plan: plans.code, movie_id?}  → нэхэмжлэх + QR
 // POST {action:"check", payment_id}                         → төлөв шалгах
 // GET/POST ?callback=1&payment_id=...                         → QPay-ийн callback
 // Нууц тохиргоо (Supabase → Edge Functions → Secrets):
@@ -123,20 +123,21 @@ Deno.serve(async (req: Request) => {
 
     // ---- Нэхэмжлэх үүсгэх ----
     if (body.action === "create") {
-      const planCode = body.plan === "rent48" ? "rent48" : "sub30";
+      const planCode = String(body.plan || "");
+      if (!/^[a-z0-9_]{2,30}$/.test(planCode)) return json({ error: "Багц сонгоно уу" }, 400);
       const [plan] = await db(`plans?code=eq.${planCode}&active=eq.true&select=*`);
-      if (!plan) return json({ error: "Төлөвлөгөө олдсонгүй" }, 400);
+      if (!plan) return json({ error: "Багц олдсонгүй" }, 400);
 
       let movieId: number | null = null;
       let amount = plan.amount as number;
       let description = `Кино Танхим — ${plan.title}`;
-      if (planCode === "rent48") {
+      if (plan.kind === "rent") {
         movieId = Number(body.movie_id);
         if (!Number.isInteger(movieId)) return json({ error: "Кино сонгоно уу" }, 400);
         const [movie] = await db(`movies?id=eq.${movieId}&published=eq.true&select=id,title,rent_price`);
         if (!movie) return json({ error: "Кино олдсонгүй" }, 404);
         amount = movie.rent_price || amount;
-        description = `Кино Танхим — ${movie.title} (48 цаг)`;
+        description = `Кино Танхим — ${movie.title} (${plan.hours} цаг)`;
       }
 
       const [payment] = await db("payments", {

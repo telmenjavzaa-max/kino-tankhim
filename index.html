@@ -160,6 +160,8 @@ dialog::backdrop { background: #000c; backdrop-filter: blur(3px); }
 .plan b { font-size: 15px; }
 .plan .price { font-size: 17px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; grid-row: span 2; }
 .plan small { color: var(--muted); font-size: 12px; }
+.plan .price s, .promo-list s { color: var(--muted); font-weight: 600; font-size: 12px; margin-right: 6px; }
+.pbadge { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; background: var(--gold); color: var(--gold-ink); vertical-align: 2px; }
 .plan.best { border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); }
 .qr-wrap { display: grid; justify-items: center; gap: 10px; }
 .qr-wrap img { width: min(240px, 100%); aspect-ratio: 1; background: #fff; border-radius: 12px; padding: 10px; }
@@ -594,7 +596,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const playerHTML = play && src
       ? `<div class="player"><iframe src="${esc(src)}" title="${esc(m.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe></div>`
       : "";
-    const rentPrice = m.rent_price || state.plans.rent48?.amount;
+    const rentPrice = m.rent_price || rentPlan()?.amount;
     $("#movieBody").innerHTML = `${playerHTML}
       <div class="d-body">
         ${posterHTML(m, false)}
@@ -629,9 +631,18 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   }
   async function loadPlans() {
     if (!sb) return;
-    const { data } = await sb.from("plans").select("code,title,amount,hours");
+    const { data } = await sb.from("plans").select("code,title,amount,old_amount,hours,kind,sort,badge,description").eq("active", true);
+    state.plans = {};
     (data || []).forEach((p) => { state.plans[p.code] = p; });
   }
+  const subPlans = () => Object.values(state.plans).filter((p) => p.kind !== "rent").sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0) || a.amount - b.amount);
+  const rentPlan = () => Object.values(state.plans).find((p) => p.kind === "rent");
+  const days = (h) => Math.round(h / 24);
+  const subBtn = (p, movieId) => `<button class="plan${p.badge ? " best" : ""}" data-buy="${esc(p.code)}" data-movie="${movieId ?? ""}">
+        <b>${esc(p.title)}${p.badge ? ` <span class="pbadge">${esc(p.badge)}</span>` : ""}</b>
+        <span class="price">${p.old_amount ? `<s>${fmt(p.old_amount)}</s>` : ""}${fmt(p.amount)}</span>
+        <small>${esc(p.description || `Бүх кино · ${days(p.hours)} хоног`)}</small>
+      </button>`;
 
   async function play(id) {
     const m = state.movies.find((x) => x.id === id);
@@ -645,20 +656,16 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   function openPaywall(m) {
     stopPolling();
-    const sub = state.plans.sub30 || { amount: 9900, hours: 720, title: "30 хоногийн эрх" };
-    const rent = state.plans.rent48 || { amount: 3000, hours: 48 };
-    const rentPrice = m.rent_price || rent.amount;
+    const rent = rentPlan();
+    const rentPrice = m.rent_price || rent?.amount;
     $("#payBody").innerHTML = `
       <h2 id="pTitle">${esc(m.title)} үзэх</h2>
       <p class="note">QPay-ээр төлөөд шууд үзнэ. Бүх банкны апп дэмжинэ.</p>
-      <button class="plan best" data-buy="sub30" data-movie="${m.id}">
-        <b>${esc(sub.title)}</b><span class="price">${fmt(sub.amount)}</span>
-        <small>Бүх кино · ${Math.round(sub.hours / 24)} хоног</small>
-      </button>
-      <button class="plan" data-buy="rent48" data-movie="${m.id}">
+      ${rent && rentPrice ? `<button class="plan" data-buy="${esc(rent.code)}" data-movie="${m.id}">
         <b>Зөвхөн энэ кино</b><span class="price">${fmt(rentPrice)}</span>
         <small>${rent.hours} цагийн турш үзнэ</small>
-      </button>
+      </button>` : ""}
+      ${subPlans().map((p) => subBtn(p, m.id)).join("")}
       <div class="msg" id="payMsg" role="status"></div>`;
     if ($("#movieDlg").open) $("#movieDlg").close();
     if (!$("#payDlg").open) $("#payDlg").showModal();
@@ -668,14 +675,10 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     if (!sb) return;
     if (!state.user) { openAuth("Эрх авахын тулд эхлээд нэвтэрнэ үү."); return; }
     stopPolling();
-    const sub = state.plans.sub30 || { amount: 9900, hours: 720, title: "30 хоногийн эрх" };
     $("#payBody").innerHTML = `
-      <h2 id="pTitle">Бүх кино — ${Math.round(sub.hours / 24)} хоног</h2>
+      <h2 id="pTitle">Багц сонгох</h2>
       <p class="note">Сайт дээрх бүх киног хязгааргүй үзнэ. QPay-ээр төлөөд шууд идэвхжинэ.</p>
-      <button class="plan best" data-buy="sub30" data-movie="">
-        <b>${esc(sub.title)}</b><span class="price">${fmt(sub.amount)}</span>
-        <small>Бүх кино · ${Math.round(sub.hours / 24)} хоног</small>
-      </button>
+      ${subPlans().map((p) => subBtn(p, null)).join("") || `<p class="note">Одоогоор идэвхтэй багц алга.</p>`}
       <div class="msg" id="payMsg" role="status"></div>`;
     if (!$("#payDlg").open) $("#payDlg").showModal();
   }
@@ -683,8 +686,9 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   async function buy(plan, movieId) {
     {
       const mv = state.movies.find((x) => x.id === movieId);
-      const amt = plan === "rent48" ? (mv?.rent_price || state.plans.rent48?.amount) : state.plans.sub30?.amount;
-      track("InitiateCheckout", { content_ids: [plan === "rent48" ? String(movieId) : "sub30"], content_name: plan === "rent48" ? mv?.title : "30 хоногийн эрх", value: Number(amt) || 0, currency: "MNT", num_items: 1 });
+      const pl = state.plans[plan] || {}, isRent = pl.kind === "rent";
+      const amt = isRent ? (mv?.rent_price || pl.amount) : pl.amount;
+      track("InitiateCheckout", { content_ids: [isRent ? String(movieId) : plan], content_name: isRent ? mv?.title : pl.title, value: Number(amt) || 0, currency: "MNT", num_items: 1 });
     }
     const msg = $("#payMsg");
     msg.className = "msg"; msg.textContent = "Нэхэмжлэх үүсгэж байна…";
@@ -736,7 +740,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       stopPolling();
       $("#payDlg").close();
       toast("Төлбөр амжилттай. Сайхан үзээрэй!");
-      track("Purchase", { value: Number(p.amount) || 0, currency: "MNT", content_ids: [p.plan === "rent48" ? String(p.movieId) : "sub30"], content_type: "product" }, { eventID: p.id });
+      track("Purchase", { value: Number(p.amount) || 0, currency: "MNT", content_ids: [state.plans[p.plan]?.kind === "rent" ? String(p.movieId) : p.plan], content_type: "product" }, { eventID: p.id });
       await loadAccess();
       play(p.movieId);
     }
@@ -805,11 +809,11 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const last = store.get("kino.promoAt", 0);
     if (Date.now() - last < 3 * 864e5) return;
     if (document.querySelector("dialog[open]")) return;
-    const sub = state.plans.sub30; if (!sub) return;
-    const rent = state.plans.rent48;
+    const subs = subPlans(); if (!subs.length) return;
+    const rent = rentPlan();
     const pics = state.movies.filter((m) => m.poster_url).slice(0, 3);
     $("#promoArt").innerHTML = `<div class="reel">${pics.map((m) => `<img src="${esc(m.poster_url)}" alt="">`).join("") || "<i></i><i></i><i></i>"}</div>`;
-    $("#promoList").innerHTML = `<div><span>${esc(sub.title || "30 хоногийн эрх")} · бүх кино</span><b>${fmt(sub.amount)}</b></div>`
+    $("#promoList").innerHTML = subs.map((p) => `<div><span>${esc(p.title)}</span><span>${p.old_amount ? `<s>${fmt(p.old_amount)}</s> ` : ""}<b>${fmt(p.amount)}</b></span></div>`).join("")
       + (rent ? `<div><span>Нэг кино · ${rent.hours} цаг</span><b>${fmt(rent.amount)}-с</b></div>` : "");
     store.set("kino.promoAt", Date.now());
     $("#promoDlg").showModal();
