@@ -212,6 +212,19 @@ dialog::backdrop { background: #000c; backdrop-filter: blur(3px); }
 .promo-list div:last-child { border-bottom: 0; }
 .promo-list b { color: var(--gold); font-variant-numeric: tabular-nums; }
 
+/* Нээгдэх үеийн лого */
+#splash { position: fixed; inset: 0; z-index: 100; background: radial-gradient(60% 50% at 50% 45%, #2a1520 0%, var(--bg) 70%); display: grid; place-items: center; transition: opacity .55s ease, visibility .55s; }
+#splash.out { opacity: 0; visibility: hidden; }
+.splash-in { display: grid; justify-items: center; gap: 16px; animation: splashPop .8s cubic-bezier(.2,.8,.2,1) both; }
+.splash-mark { width: 84px; height: 84px; border-radius: 22px; background: linear-gradient(145deg, var(--gold), var(--gold-2)); display: grid; place-items: center; box-shadow: 0 0 0 1px #ffffff14 inset, 0 18px 60px -12px color-mix(in srgb, var(--gold) 70%, transparent); }
+.splash-mark svg { width: 46px; height: 46px; fill: var(--gold-ink); }
+.splash-name { font-family: var(--display); font-weight: 800; font-size: 28px; letter-spacing: -.01em; color: var(--fg); }
+.splash-name b { color: var(--gold); }
+.splash-bar { width: 120px; height: 3px; border-radius: 3px; background: #ffffff1a; overflow: hidden; }
+.splash-bar i { display: block; width: 40%; height: 100%; border-radius: 3px; background: var(--gold); animation: splashBar 1.1s ease-in-out infinite; }
+@keyframes splashPop { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes splashBar { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (prefers-reduced-motion: reduce) { .splash-in, .splash-bar i { animation: none; } }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 700; z-index: 60; }
 footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 footer .wrap { padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px 32px; }
@@ -242,6 +255,19 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 </style>
 </head>
 <body>
+
+<div id="splash" aria-hidden="true">
+  <div class="splash-in">
+    <div class="splash-mark"><svg viewBox="0 0 24 24"><path d="M4 5h16v2H4zM5 9h14l-1 10H6zM9 11v6l5-3z" fill-rule="evenodd"/></svg></div>
+    <div class="splash-name">Кино<b>Танхим</b></div>
+    <div class="splash-bar"><i></i></div>
+  </div>
+</div>
+<script>
+  // Нэг табд нэг л удаа харуулна
+  try { if (sessionStorage.getItem("kino.splash")) document.getElementById("splash").remove(); else sessionStorage.setItem("kino.splash", "1"); } catch (e) {}
+  window.__splashT0 = Date.now();
+</script>
 
 <header class="top">
   <div class="wrap">
@@ -994,12 +1020,21 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   addEventListener("pagehide", () => { const k = state.kp; if (k?.pos) saveProgress(k.movieId, k.pos, k.dur); });
 
   // ---------- Эхлүүлэх ----------
+  let splashDone = false;
+  function hideSplash() {
+    if (splashDone) return; splashDone = true;
+    const el = document.getElementById("splash"); if (!el) return;
+    const wait = Math.max(0, 1100 - (Date.now() - (window.__splashT0 || 0)));
+    setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 600); }, wait);
+  }
+  setTimeout(hideSplash, 3500); // сүлжээ удаан бол ч 3.5 секундээс хэтрэхгүй
   (async () => {
     state.movies = SAMPLE; render(); startHero();
-    if (!sb) return;
+    if (!sb) { hideSplash(); return; }
     [state.movies] = await Promise.all([loadMovies(), loadPlans()]);
     const { data } = await sb.auth.getSession();
     await onUser(data.session?.user || null);
+    hideSplash();
     sb.auth.onAuthStateChange((_e, session) => { if ((session?.user?.id || null) !== (state.user?.id || null)) onUser(session?.user || null); });
     setTimeout(maybePromo, 1500);
   })();
