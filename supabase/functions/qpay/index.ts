@@ -83,7 +83,7 @@ async function qpay(path: string, token: string, body: unknown) {
 const sha256 = async (v: string) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v)))).map((b) => b.toString(16).padStart(2, "0")).join("");
 async function sendCapiPurchase(paymentId: string) {
   const token = Deno.env.get("META_CAPI_TOKEN");
-  const pixel = Deno.env.get("META_PIXEL_ID") || "2406750310096601";
+  const pixel = Deno.env.get("META_PIXEL_ID") || "1901464801052708";
   if (!token) return;
   const [p] = await db(`payments?id=eq.${paymentId}&select=id,user_id,amount,plan_code,movie_id,paid_at,fbp,fbc,client_ua`);
   if (!p) return;
