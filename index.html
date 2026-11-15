@@ -832,7 +832,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const msg = $("#payMsg");
     msg.className = "msg"; msg.textContent = "Нэхэмжлэх үүсгэж байна…";
     document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = true));
-    const { data, error } = await sb.functions.invoke("qpay", { body: { action: "create", plan, movie_id: movieId } });
+    const ck = (n) => (document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)")) || [])[1] || "";
+    const { data, error } = await sb.functions.invoke("qpay", { body: { action: "create", plan, movie_id: movieId, fbp: ck("_fbp"), fbc: ck("_fbc") } });
     if (error || !data?.payment_id) {
       let text = error?.message || "Алдаа гарлаа";
       try { const j = await error.context.json(); if (j?.error) text = j.error; } catch {}
@@ -960,6 +961,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   async function onUser(user) {
     state.user = user;
+    // Pixel-д кодолсон дотоод ID (сервер талын Purchase-тэй тааруулахад)
+    if (user && window.fbq && PIXEL && crypto?.subtle) crypto.subtle.digest("SHA-256", new TextEncoder().encode(user.id)).then((b) => { try { fbq("init", PIXEL, { external_id: [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("") }); } catch {} });
     await Promise.all([loadFavs(), loadAccess(), loadProgress()]); render();
     if (user && state.pendingPlay) { const id = state.pendingPlay; state.pendingPlay = null; play(id); }
   }
