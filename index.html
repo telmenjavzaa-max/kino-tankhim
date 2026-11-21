@@ -961,8 +961,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   // Анх орсон, эрхгүй хэрэглэгчид 3 хоногт нэг удаа санал үзүүлнэ
   function maybePromo() {
     if (!sb || hasSub()) return;
-    const last = store.get("kino.promoAt", 0);
-    if (Date.now() - last < 3 * 864e5) return;
+    try { if (sessionStorage.getItem("kino.promoShown")) return; } catch {}
     if (document.querySelector("dialog[open]")) return;
     const subs = subPlans(); if (!subs.length) return;
     const rent = rentPlan();
@@ -970,7 +969,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     $("#promoArt").innerHTML = `<div class="reel">${pics.map((m) => `<img src="${esc(m.poster_url)}" alt="">`).join("") || "<i></i><i></i><i></i>"}</div>`;
     $("#promoList").innerHTML = subs.map((p) => `<div><span>${esc(p.title)}</span><span>${p.old_amount ? `<s>${fmt(p.old_amount)}</s> ` : ""}<b>${fmt(p.amount)}</b></span></div>`).join("")
       + (rent ? `<div><span>Нэг кино · ${rent.hours} цаг</span><b>${fmt(rent.amount)}-с</b></div>` : "");
-    store.set("kino.promoAt", Date.now());
+    try { sessionStorage.setItem("kino.promoShown", "1"); } catch {}
     $("#promoDlg").showModal();
   }
 
@@ -1056,7 +1055,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     await onUser(data.session?.user || null);
     hideSplash();
     sb.auth.onAuthStateChange((_e, session) => { if ((session?.user?.id || null) !== (state.user?.id || null)) onUser(session?.user || null); });
-    setTimeout(maybePromo, 1500);
+    setTimeout(maybePromo, 3000);
   })();
 })();
 </script>
