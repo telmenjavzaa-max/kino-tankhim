@@ -122,6 +122,10 @@ nav.tabs button[aria-current="page"]::after { content: ""; position: absolute; l
 
 .card { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .poster { position: relative; aspect-ratio: 1 / 1.414; width: 100%; border-radius: var(--radius); overflow: hidden; background: linear-gradient(160deg, hsl(var(--h1) 55% 40%), hsl(var(--h2) 60% 13%)); display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; isolation: isolate; transition: transform .25s ease, box-shadow .25s ease; }
+.poster.adult img { filter: blur(18px) brightness(.7); transform: scale(1.15); }
+.poster .age { position: absolute; top: 8px; left: 8px; z-index: 3; background: #c0262d; color: #fff; font-weight: 800; font-size: 11px; padding: 3px 7px; border-radius: 6px; }
+.menu a.adm { display: block; padding: 9px 10px; border-radius: 8px; font-weight: 700; color: var(--gold, #e8b45c); text-decoration: none; }
+.menu a.adm:hover { background: var(--surface-2); }
 .poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform .4s ease; }
 .card:hover .poster, .card:focus-visible .poster { transform: translateY(-3px); box-shadow: 0 16px 30px -14px #000; }
 .card:hover .poster img { transform: scale(1.04); }
@@ -297,6 +301,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     <div class="access" id="access" hidden></div>
     <button data-view="favs">★ Миний жагсаалт</button>
     <button id="menuPlans">Эрх сунгах</button>
+    <a class="adm" id="adminLink" href="admin.html" hidden>⚙ Админ самбар</a>
     <button id="logoutBtn">Гарах</button>
   </div>
 </header>
@@ -469,11 +474,19 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   const dur = (r) => { r = +r || 0; const h = Math.floor(r / 60), m = r % 60; return h ? `${h} цаг${m ? ` ${m} мин` : ""}` : `${m} мин`; };
   const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.3 5 6.6 5c2 0 3.5 1.1 5.4 3 1.9-1.9 3.4-3 5.4-3C20.7 5 23 8.3 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>';
+  const isAdult = (m) => /18/.test(m?.genre || "");
+  const adultOK = () => store.get("kino.adult", false) === true;
+  function confirmAge() {
+    if (adultOK()) return true;
+    if (!confirm("Энэ кино 18 наснаас дээш хүнд зориулагдсан. Та 18 нас хүрсэн үү?")) return false;
+    store.set("kino.adult", true); render(); return true;
+  }
   function posterHTML(m, withBadges = true, priority = false) {
     const badge = !withBadges ? "" : !m.has_video ? `<span class="badge soon">Удахгүй</span>` : hasAccess(m.id) ? `<span class="badge open">Нээлттэй</span>` : `<span class="badge">VIP</span>`;
-    return `<div class="poster" style="--h1:${+m.hue1 || 0};--h2:${+m.hue2 || 220}">
+    const blur = isAdult(m) && !adultOK();
+    return `<div class="poster${blur ? " adult" : ""}" style="--h1:${+m.hue1 || 0};--h2:${+m.hue2 || 220}">
       ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="${esc(m.title)} постер" width="600" height="848" ${priority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}<div class="p-title">${esc(m.title)}</div>
-      ${badge}
+      ${badge}${isAdult(m) ? `<span class="age">18+</span>` : ""}
       ${withBadges && state.favs.has(m.id) ? `<span class="fav-mark" title="Миний жагсаалтад">${heart}</span>` : ""}
       ${withBadges ? `<div class="info">${esc(m.year)} · ${dur(m.runtime)}</div>` : ""}
     </div>`;
@@ -533,7 +546,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   }
 
   function heroItems() {
-    const list = [...state.movies].filter((m) => m.poster_url).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b));
+    const list = [...state.movies].filter((m) => m.poster_url && !isAdult(m)).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b));
     return list.slice(0, 6);
   }
   function renderHero() {
@@ -628,6 +641,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   function openMovie(id, play = false, videoUrl = "", opts = {}) {
     const m = state.movies.find((x) => x.id === id);
     if (!m) return;
+    if (isAdult(m) && !confirmAge()) return;
     if (!play) track("ViewContent", { content_ids: [String(m.id)], content_name: m.title, content_type: "product", content_category: m.genre || "" });
     state.current = m;
     const src = embedUrl(videoUrl);
@@ -783,6 +797,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   async function play(id) {
     const m = state.movies.find((x) => x.id === id);
     if (!m || !m.has_video) return;
+    if (isAdult(m) && !confirmAge()) return;
     if (!sb) return;
     if (!state.user) { state.pendingPlay = id; openAuth("Кино үзэхийн тулд нэвтэрнэ үү."); return; }
     const [{ data }, tok] = await Promise.all([
@@ -951,7 +966,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     if (document.querySelector("dialog[open]")) return;
     const subs = subPlans(); if (!subs.length) return;
     const rent = rentPlan();
-    const pics = state.movies.filter((m) => m.poster_url).slice(0, 3);
+    const pics = state.movies.filter((m) => m.poster_url && !isAdult(m)).slice(0, 3);
     $("#promoArt").innerHTML = `<div class="reel">${pics.map((m) => `<img src="${esc(m.poster_url)}" alt="">`).join("") || "<i></i><i></i><i></i>"}</div>`;
     $("#promoList").innerHTML = subs.map((p) => `<div><span>${esc(p.title)}</span><span>${p.old_amount ? `<s>${fmt(p.old_amount)}</s> ` : ""}<b>${fmt(p.amount)}</b></span></div>`).join("")
       + (rent ? `<div><span>Нэг кино · ${rent.hours} цаг</span><b>${fmt(rent.amount)}-с</b></div>` : "");
@@ -961,6 +976,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   async function onUser(user) {
     state.user = user;
+    $("#adminLink").hidden = true;
+    if (user && sb) sb.rpc("is_admin").then(({ data }) => { if (state.user?.id === user.id) $("#adminLink").hidden = data !== true; }, () => {});
     // Pixel-д кодолсон дотоод ID (сервер талын Purchase-тэй тааруулахад)
     if (user && window.fbq && PIXEL && crypto?.subtle) crypto.subtle.digest("SHA-256", new TextEncoder().encode(user.id)).then((b) => { try { fbq("init", PIXEL, { external_id: [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("") }); } catch {} });
     await Promise.all([loadFavs(), loadAccess(), loadProgress()]); render();

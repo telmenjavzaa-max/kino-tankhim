@@ -177,7 +177,7 @@ dialog::backdrop { background: #000c; }
         <div class="row">
           <label class="f">Он<input id="eYear" type="number" min="1900" max="2100"></label>
           <label class="f">Үргэлжлэх (мин)<input id="eRuntime" type="number" min="1" max="600"></label>
-          <label class="f">Төрөл<input id="eGenre" list="genreList" maxlength="40"></label>
+          <label class="f">Төрөл<select id="eGenreSel"></select><input id="eGenre" maxlength="40" placeholder="Шинэ төрлийн нэр" hidden></label>
         </div>
         <datalist id="genreList"></datalist>
         <label class="f">Тайлбар<textarea id="eDesc" maxlength="1000"></textarea></label>
@@ -215,6 +215,21 @@ dialog::backdrop { background: #000c; }
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
+  const GENRES = ["Драм", "Романтик", "Инээдмийн", "Тулаант", "Триллер", "Аймшгийн", "Адал явдалт", "Гэмт хэрэг", "Түүхэн", "Уран зөгнөлт", "Гэр бүл", "Хүүхэлдэйн", "Баримтат", "Хятад драм", "Солонгос драм", "+18"];
+  function fillGenres(cur) {
+    const sel = document.getElementById("eGenreSel"), inp = document.getElementById("eGenre");
+    if (cur === undefined) cur = inp.value;
+    const used = (window.__kinoMovies || []).map((m) => m.genre).filter(Boolean);
+    const all = [...new Set([...GENRES, ...used, ...(cur ? [cur] : [])])];
+    const e = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    sel.innerHTML = `<option value="">— Сонгох —</option>` + all.map((g) => `<option value="${e(g)}">${g === "+18" ? "+18 (насанд хүрэгчдэд)" : e(g)}</option>`).join("") + `<option value="__new">+ Шинэ төрөл…</option>`;
+    sel.value = cur || ""; inp.value = cur || ""; inp.hidden = true;
+  }
+  document.addEventListener("change", (ev) => {
+    if (ev.target.id !== "eGenreSel") return;
+    const inp = document.getElementById("eGenre");
+    if (ev.target.value === "__new") { inp.value = ""; inp.hidden = false; inp.focus(); } else { inp.value = ev.target.value; inp.hidden = true; }
+  });
 (() => {
   const cfg = window.KINO_CONFIG || {};
   const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
@@ -273,9 +288,10 @@ dialog::backdrop { background: #000c; }
       sb.from("movie_videos").select("movie_id,video_url"),
     ]);
     if (error) { toast("Кино ачаалж чадсангүй: " + error.message); return; }
-    state.movies = movies || [];
+    state.movies = movies || []; window.__kinoMovies = state.movies;
     state.videos = Object.fromEntries((vids || []).map((v) => [v.movie_id, v.video_url]));
     $("#genreList").innerHTML = [...new Set(state.movies.map((m) => m.genre).filter(Boolean))].map((g) => `<option value="${esc(g)}">`).join("");
+    fillGenres();
     renderMovies();
   }
   function renderMovies() {
@@ -302,7 +318,7 @@ dialog::backdrop { background: #000c; }
     $("#eTitleIn").value = m?.title || "";
     $("#eYear").value = m?.year || new Date().getFullYear();
     $("#eRuntime").value = m?.runtime || "";
-    $("#eGenre").value = m?.genre || "";
+    fillGenres(m?.genre || "");
     $("#eDesc").value = m?.description || "";
     $("#eVideo").value = m ? (state.videos[m.id] || "") : "";
     $("#eRent").value = m?.rent_price || "";
