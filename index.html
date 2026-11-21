@@ -772,7 +772,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   async function loadAccess() {
     state.ents = [];
     if (sb && state.user) {
-      const { data } = await sb.from("entitlements").select("movie_id,expires_at").gt("expires_at", new Date().toISOString());
+      const { data } = await sb.from("entitlements").select("movie_id,expires_at").eq("user_id", state.user.id).gt("expires_at", new Date().toISOString());
       state.ents = data || [];
     }
     const sub = state.ents.filter((e) => e.movie_id == null).sort((a, b) => b.expires_at.localeCompare(a.expires_at))[0];
