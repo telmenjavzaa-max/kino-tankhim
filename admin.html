@@ -282,6 +282,18 @@ dialog::backdrop { background: #000c; }
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const fmt = (n) => Number(n || 0).toLocaleString("en-US") + "₮";
   const dt = (s) => s ? new Date(s).toLocaleString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+
+  // Зургийг оруулахаас өмнө жижигрүүлнэ (Supabase урсгал хэмнэх)
+  async function shrinkImg(file, maxW) {
+    try {
+      const bmp = await createImageBitmap(file);
+      const w = Math.min(maxW, bmp.width), h = Math.round(bmp.height * w / bmp.width);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(bmp, 0, 0, w, h);
+      const blob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.82));
+      return blob && blob.size < file.size ? blob : file;
+    } catch (e) { return file; }
+  }
   const state = { movies: [], videos: {}, plans: [], editing: null, posterFile: null };
 
   function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; d.setAttribute("role", "status"); document.body.appendChild(d); setTimeout(() => d.remove(), 2400); }
@@ -416,9 +428,10 @@ dialog::backdrop { background: #000c; }
         featured: $("#eFeatured").checked,
       };
       if (state.posterFile) {
-        const ext = (state.posterFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const upFile = await shrinkImg(state.posterFile, 600);
+        const ext = upFile === state.posterFile ? (state.posterFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") : "jpg";
         const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { error: upErr } = await sb.storage.from("posters").upload(path, state.posterFile, { cacheControl: "31536000", contentType: state.posterFile.type });
+        const { error: upErr } = await sb.storage.from("posters").upload(path, upFile, { cacheControl: "31536000", contentType: upFile.type || state.posterFile.type });
         if (upErr) throw new Error("Постер оруулж чадсангүй: " + upErr.message);
         row.poster_url = sb.storage.from("posters").getPublicUrl(path).data.publicUrl;
       }
