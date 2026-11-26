@@ -159,6 +159,15 @@ main { padding-bottom: 56px; }
 
 /* ---------- Цонхнууд ---------- */
 dialog { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 16px; padding: 0; width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 40px); }
+/* Компьютерээс үзэхийг хориглох цонх */
+#mobDlg { width: min(460px, calc(100vw - 32px)); }
+.mob { padding: 32px 26px 28px; text-align: center; display: grid; justify-items: center; gap: 12px; }
+.mob-ic { width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #e8b45c, #b9742f); color: #120a0e; }
+.mob-ic svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; }
+.mob h2 { margin: 2px 0 0; font-size: 24px; }
+.mob p { margin: 0; color: var(--muted, #aaa); max-width: 360px; }
+.mob img { width: 168px; height: 168px; border-radius: 12px; background: #fff; padding: 8px; }
+.mob .btn { min-width: 140px; }
 dialog::backdrop { background: #000c; backdrop-filter: blur(3px); }
 #authDlg, #payDlg, #promoDlg { width: min(440px, calc(100vw - 32px)); }
 .pay { padding: 26px; display: grid; gap: 14px; }
@@ -404,6 +413,14 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     <div class="msg" id="authMsg" role="status"></div>
     <button class="btn ghost" type="button" data-close>Болих</button>
   </div>
+</dialog>
+
+<dialog id="mobDlg" aria-labelledby="mobTitle">
+  <div class="mob"><div class="mob-ic"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
+    <h2 id="mobTitle">Зөвхөн утаснаас үзнэ</h2>
+    <p>Киног зөвхөн гар утаснаас үзэх боломжтой. Утсаараа доорх QR кодыг уншуулж эсвэл <b>kinotanhim.com</b> руу орж, ижил бүртгэлээрээ нэвтэрнэ үү.</p>
+    <img id="mobQr" alt="Утсаар нээх QR код">
+    <button class="btn" id="mobOk">Ойлголоо</button></div>
 </dialog>
 
 <dialog id="payDlg" aria-labelledby="pTitle">
@@ -794,6 +811,16 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
         <small>${esc(p.description || `Бүх кино · ${days(p.hours)} хоног`)}</small>
       </button>`;
 
+  // Компьютерээс үзэхийг хориглоно (админаас бусад). Таблет, утас зөвшөөрөгдөнө.
+  const isMobileDevice = () => /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+  function desktopBlocked(movieId) {
+    if (isMobileDevice() || !$("#adminLink").hidden) return false;
+    const url = location.origin + "/";
+    $("#mobQr").src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data=" + encodeURIComponent(url);
+    const d = $("#mobDlg"); if (!d.open) d.showModal();
+    return true;
+  }
+  $("#mobOk").addEventListener("click", () => $("#mobDlg").close());
   async function play(id) {
     const m = state.movies.find((x) => x.id === id);
     if (!m || !m.has_video) return;
@@ -804,6 +831,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       sb.from("movie_videos").select("video_url").eq("movie_id", id).maybeSingle(),
       sb.rpc("video_token", { p_movie: id }),
     ]);
+    if (data?.video_url && desktopBlocked(id)) return;
     if (data?.video_url) { openMovie(id, true, data.video_url, { token: tok?.data || "" }); return; }
     openPaywall(m);
   }
